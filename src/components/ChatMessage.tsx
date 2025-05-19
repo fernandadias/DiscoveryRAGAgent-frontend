@@ -165,9 +165,22 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
     h3: ({ children }: { children: React.ReactNode }) => (
       <h3 className="text-lg font-semibold mt-4 mb-2 text-white/90">{children}</h3>
     ),
-    p: ({ children }: { children: React.ReactNode }) => (
-      <p className="my-2 leading-relaxed">{children}</p>
-    ),
+    p: ({ children }: { children: React.ReactNode }) => {
+      const text = children?.toString() || '';
+      
+      if (text.startsWith(':::info')) {
+        const content = text.replace(':::info', '');
+        return <Callout type="info">{content}</Callout>;
+      } else if (text.startsWith(':::warning')) {
+        const content = text.replace(':::warning', '');
+        return <Callout type="warning">{content}</Callout>;
+      } else if (text.startsWith(':::success')) {
+        const content = text.replace(':::success', '');
+        return <Callout type="success">{content}</Callout>;
+      }
+      
+      return <p className="my-2 leading-relaxed">{children}</p>;
+    },
     blockquote: ({ children }: { children: React.ReactNode }) => (
       <blockquote className="pl-4 border-l-2 border-primary/50 italic my-4 text-white/80">{children}</blockquote>
     ),
@@ -199,23 +212,6 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
           </pre>
         </div>
       );
-    },
-    // Para processar callouts personalizados
-    p: ({ children }: any) => {
-      const text = children?.toString() || '';
-      
-      if (text.startsWith(':::info')) {
-        const content = text.replace(':::info', '');
-        return <Callout type="info">{content}</Callout>;
-      } else if (text.startsWith(':::warning')) {
-        const content = text.replace(':::warning', '');
-        return <Callout type="warning">{content}</Callout>;
-      } else if (text.startsWith(':::success')) {
-        const content = text.replace(':::success', '');
-        return <Callout type="success">{content}</Callout>;
-      }
-      
-      return <p className="my-2 leading-relaxed">{children}</p>;
     }
   };
 
