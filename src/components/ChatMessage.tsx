@@ -1,7 +1,21 @@
 
 import { useState } from 'react';
 import { ThumbsUp, ThumbsDown, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  Box, 
+  Flex, 
+  Text, 
+  Button, 
+  Modal, 
+  ModalOverlay, 
+  ModalContent, 
+  ModalHeader, 
+  ModalBody, 
+  ModalFooter,
+  Textarea,
+  useDisclosure,
+  Badge
+} from '@heroui/react';
 import { cn } from '@/lib/utils';
 import ChatSourceReference from './ChatSourceReference';
 import ReactMarkdown from 'react-markdown';
@@ -126,18 +140,24 @@ const Callout = ({ children, type = 'info' }: { children: React.ReactNode; type?
   const style = styles[type];
   
   return (
-    <div className={`${style.bg} border-l-4 ${style.border} p-4 rounded-md my-4`}>
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5">{style.icon}</div>
-        <div className="text-sm">{children}</div>
-      </div>
-    </div>
+    <Box 
+      className={`${style.bg} ${style.border}`} 
+      borderLeftWidth="4px" 
+      rounded="md" 
+      my={4} 
+      p={4}
+    >
+      <Flex alignItems="start" gap={3}>
+        <Box mt={0.5}>{style.icon}</Box>
+        <Text size="sm">{children}</Text>
+      </Flex>
+    </Box>
   );
 };
 
 const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
   const [liked, setLiked] = useState<boolean | null>(null);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedFeedback, setSelectedFeedback] = useState<string[]>([]);
   const [comment, setComment] = useState('');
 
@@ -151,19 +171,19 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
 
   const handleFeedbackSubmit = () => {
     console.log('Feedback submitted:', { selectedFeedback, comment });
-    setFeedbackOpen(false);
+    onClose();
   };
 
   // Componentes de renderização customizados para markdown
   const renderers = {
     h1: ({ children }: { children: React.ReactNode }) => (
-      <h1 className="text-2xl font-bold mt-6 mb-3 pb-2 border-b border-white/10 text-white">{children}</h1>
+      <Text as="h1" fontSize="2xl" fontWeight="bold" mt={6} mb={3} pb={2} borderBottom="1px solid" borderColor="white/10" color="white">{children}</Text>
     ),
     h2: ({ children }: { children: React.ReactNode }) => (
-      <h2 className="text-xl font-bold mt-5 mb-3 text-white/90">{children}</h2>
+      <Text as="h2" fontSize="xl" fontWeight="bold" mt={5} mb={3} color="white/90">{children}</Text>
     ),
     h3: ({ children }: { children: React.ReactNode }) => (
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-white/90">{children}</h3>
+      <Text as="h3" fontSize="lg" fontWeight="semibold" mt={4} mb={2} color="white/90">{children}</Text>
     ),
     p: ({ children }: { children: React.ReactNode }) => {
       const text = children?.toString() || '';
@@ -179,21 +199,21 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
         return <Callout type="success">{content}</Callout>;
       }
       
-      return <p className="my-2 leading-relaxed">{children}</p>;
+      return <Text my={2} lineHeight="relaxed">{children}</Text>;
     },
     blockquote: ({ children }: { children: React.ReactNode }) => (
-      <blockquote className="pl-4 border-l-2 border-primary/50 italic my-4 text-white/80">{children}</blockquote>
+      <Box pl={4} borderLeft="2px solid" borderColor="primary/50" fontStyle="italic" my={4} color="white/80">{children}</Box>
     ),
     ul: ({ children }: { children: React.ReactNode }) => (
-      <ul className="list-disc pl-6 my-3 space-y-1">{children}</ul>
+      <Box as="ul" className="list-disc" pl={6} my={3} className="space-y-1">{children}</Box>
     ),
     ol: ({ children }: { children: React.ReactNode }) => (
-      <ol className="list-decimal pl-6 my-3 space-y-1">{children}</ol>
+      <Box as="ol" className="list-decimal" pl={6} my={3} className="space-y-1">{children}</Box>
     ),
     li: ({ children }: { children: React.ReactNode }) => (
-      <li className="my-1">{children}</li>
+      <Box as="li" my={1}>{children}</Box>
     ),
-    hr: () => <hr className="my-4 border-white/10" />,
+    hr: () => <Box as="hr" my={4} borderColor="white/10" />,
     code: ({ node, inline, className, children, ...props }: any) => {
       // Verificando se é um code block de gráfico
       const match = /language-chart/.exec(className || '');
@@ -202,123 +222,128 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
       }
       
       if (inline) {
-        return <code className="bg-secondary/50 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>;
+        return <Box as="code" bg="secondary/50" px={1.5} py={0.5} rounded="sm" fontSize="sm" fontFamily="mono" {...props}>{children}</Box>;
       }
       
       return (
-        <div className="my-4 bg-secondary/30 p-4 rounded-md">
-          <pre className="overflow-auto text-sm font-mono text-white/90">
-            <code {...props}>{children}</code>
-          </pre>
-        </div>
+        <Box my={4} bg="secondary/30" p={4} rounded="md">
+          <Box as="pre" overflow="auto" fontSize="sm" fontFamily="mono" color="white/90">
+            <Box as="code" {...props}>{children}</Box>
+          </Box>
+        </Box>
       );
     }
   };
 
   if (isUser) {
     return (
-      <div className="flex justify-end mb-4 animate-fade-in">
-        <div className="bg-primary/10 p-4 rounded-lg max-w-[80%] shadow-sm">
-          <p className="text-white">{content}</p>
-        </div>
-      </div>
+      <Flex justify="end" mb={4} className="animate-fade-in">
+        <Box bg="primary/10" p={4} rounded="lg" maxW="80%" className="shadow-sm">
+          <Text color="white">{content}</Text>
+        </Box>
+      </Flex>
     );
   }
 
   return (
-    <div className={cn("flex flex-col mb-6 animate-fade-in", isLoading ? "opacity-80" : "")}>
-      <div className="bg-secondary/30 p-4 rounded-lg max-w-[90%] shadow-sm relative">
+    <Flex direction="column" mb={6} className={cn("animate-fade-in", isLoading ? "opacity-80" : "")}>
+      <Box bg="secondary/30" p={4} rounded="lg" maxW="90%" className="shadow-sm relative hero-card">
         {isLoading ? (
-          <div className="flex items-center space-x-2">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
-            </div>
-            <p className="text-white/70 italic">A IA está elaborando uma resposta...</p>
-          </div>
+          <Flex alignItems="center" gap={2}>
+            <Flex gap={1}>
+              <Box w={2} h={2} bg="primary/60" rounded="full" className="animate-bounce-soft" style={{ animationDelay: "0ms" }}></Box>
+              <Box w={2} h={2} bg="primary/60" rounded="full" className="animate-bounce-soft" style={{ animationDelay: "150ms" }}></Box>
+              <Box w={2} h={2} bg="primary/60" rounded="full" className="animate-bounce-soft" style={{ animationDelay: "300ms" }}></Box>
+            </Flex>
+            <Text color="white/70" fontStyle="italic">A IA está elaborando uma resposta...</Text>
+          </Flex>
         ) : (
           <>
-            <div className="prose prose-invert prose-sm max-w-none">
+            <Box className="prose prose-invert prose-sm max-w-none">
               <ReactMarkdown components={renderers}>{content}</ReactMarkdown>
-            </div>
+            </Box>
             
             {sources && sources.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-white/10">
-                <p className="text-muted-foreground text-sm mb-2">Fontes utilizadas:</p>
-                <div className="flex flex-col space-y-2">
+              <Box mt={4} pt={3} borderTop="1px solid" borderColor="white/10">
+                <Text color="muted" fontSize="sm" mb={2}>Fontes utilizadas:</Text>
+                <Flex direction="column" gap={2}>
                   {sources.map(source => (
                     <ChatSourceReference key={source.id} source={source} />
                   ))}
-                </div>
-              </div>
+                </Flex>
+              </Box>
             )}
             
-            <div className="flex items-center mt-3 pt-3 border-t border-white/10">
-              <button 
+            <Flex alignItems="center" mt={3} pt={3} borderTop="1px solid" borderColor="white/10">
+              <Button 
                 onClick={() => setLiked(true)} 
-                className={cn(
-                  "p-1 rounded-md mr-2 transition-all", 
-                  liked === true ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-white"
-                )}
+                variant="ghost"
+                size="sm"
+                colorScheme={liked === true ? "primary" : "gray"}
+                mr={2}
+                className="transition-all"
+                p={1}
               >
                 <ThumbsUp size={18} />
-              </button>
+              </Button>
               
-              <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
-                <DialogTrigger asChild>
-                  <button 
-                    onClick={() => setLiked(false)} 
-                    className={cn(
-                      "p-1 rounded-md transition-all", 
-                      liked === false ? "bg-destructive/20 text-destructive" : "text-muted-foreground hover:text-white"
-                    )}
-                  >
-                    <ThumbsDown size={18} />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-lg">Como podemos melhorar?</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid grid-cols-2 gap-2 my-4">
-                    {FeedbackOptions.map(option => (
-                      <button
-                        key={option.id}
-                        onClick={() => toggleFeedbackOption(option.id)}
-                        className={cn(
-                          "px-3 py-2 text-sm rounded-md border transition-all",
-                          selectedFeedback.includes(option.id)
-                            ? "border-primary bg-primary/20 text-white"
-                            : "border-muted bg-secondary/30 text-muted-foreground hover:text-white hover:bg-secondary/50"
-                        )}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Comentários adicionais (opcional)"
-                    className="w-full p-2 text-sm bg-secondary/30 border border-muted rounded-md focus:outline-none focus:border-primary transition-colors"
-                    rows={3}
-                  />
-                  <div className="flex justify-end mt-4">
-                    <button
-                      onClick={handleFeedbackSubmit}
-                      className="px-4 py-2 bg-primary hover:bg-primary/80 text-white rounded-md transition-colors"
+              <Button 
+                onClick={() => {
+                  setLiked(false);
+                  onOpen();
+                }}
+                variant="ghost"
+                size="sm"
+                colorScheme={liked === false ? "red" : "gray"}
+                className="transition-all"
+                p={1}
+              >
+                <ThumbsDown size={18} />
+              </Button>
+              
+              <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>Como podemos melhorar?</ModalHeader>
+                  <ModalBody>
+                    <Box 
+                      display="grid" 
+                      gridTemplateColumns="repeat(2, 1fr)" 
+                      gap={2} 
+                      my={4}
                     >
+                      {FeedbackOptions.map(option => (
+                        <Button
+                          key={option.id}
+                          onClick={() => toggleFeedbackOption(option.id)}
+                          variant={selectedFeedback.includes(option.id) ? "solid" : "outline"}
+                          colorScheme={selectedFeedback.includes(option.id) ? "primary" : "gray"}
+                          size="sm"
+                        >
+                          {option.label}
+                        </Button>
+                      ))}
+                    </Box>
+                    <Textarea
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Comentários adicionais (opcional)"
+                      size="sm"
+                      rows={3}
+                    />
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button colorScheme="primary" onClick={handleFeedbackSubmit}>
                       Enviar feedback
-                    </button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+                    </Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
+            </Flex>
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Flex>
   );
 };
 

@@ -1,6 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
+import { Button, Input, Box, Text, Flex } from '@heroui/react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -42,25 +43,37 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
   };
 
   return (
-    <div className="w-full">
+    <Box width="full">
       {suggestions.length > 0 && message.length === 0 && (
-        <div className="mb-4">
-          <p className="text-sm text-muted-foreground mb-2">Sugestões para iniciar:</p>
-          <div className="flex flex-wrap gap-2">
+        <Box mb={4}>
+          <Text size="sm" color="muted" mb={2}>Sugestões para iniciar:</Text>
+          <Flex wrap="wrap" gap={2}>
             {suggestions.map((suggestion, index) => (
-              <button
+              <Button
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="px-3 py-1.5 bg-secondary/30 hover:bg-secondary/50 rounded-lg text-sm text-muted-foreground hover:text-white transition-colors"
+                variant="subtle"
+                size="sm"
+                color="muted"
               >
                 {suggestion}
-              </button>
+              </Button>
             ))}
-          </div>
-        </div>
+          </Flex>
+        </Box>
       )}
       
-      <div className="relative flex items-end bg-secondary/30 rounded-lg border border-secondary p-2 focus-within:border-primary transition-colors">
+      <Box 
+        position="relative" 
+        display="flex" 
+        alignItems="end" 
+        bg="bg-secondary/30" 
+        rounded="lg" 
+        border="1px solid"
+        borderColor="secondary"
+        p={2}
+        className="focus-within:border-primary transition-colors"
+      >
         <textarea
           ref={inputRef}
           value={message}
@@ -71,15 +84,19 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
           disabled={isLoading}
           rows={1}
         />
-        <button
+        <Button
           onClick={handleSendMessage}
           disabled={!message.trim() || isLoading}
-          className={`p-3 rounded-md ml-2 ${!message.trim() || isLoading ? 'text-muted-foreground' : 'bg-primary text-white hover:bg-primary/80'} transition-colors`}
+          colorScheme={!message.trim() || isLoading ? "gray" : "primary"}
+          variant="solid"
+          className="ml-2"
+          isDisabled={!message.trim() || isLoading}
+          aria-label="Enviar mensagem"
         >
           <Send size={18} />
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

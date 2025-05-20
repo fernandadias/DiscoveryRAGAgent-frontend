@@ -1,5 +1,6 @@
 
 import type { Config } from "tailwindcss";
+import { heroui } from "@heroui/themes";
 
 export default {
 	darkMode: ["class"],
@@ -8,6 +9,7 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+		"./node_modules/@heroui/**/*.js",
 	],
 	prefix: "",
 	theme: {
@@ -71,12 +73,12 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: { height: '0' },
-					to: { height: 'var(--radix-accordion-content-height)' }
+					from: { height: '0', opacity: '0' },
+					to: { height: 'var(--radix-accordion-content-height)', opacity: '1' }
 				},
 				'accordion-up': {
-					from: { height: 'var(--radix-accordion-content-height)' },
-					to: { height: '0' }
+					from: { height: 'var(--radix-accordion-content-height)', opacity: '1' },
+					to: { height: '0', opacity: '0' }
 				},
 				'fade-in': {
 					'0%': { opacity: '0', transform: 'translateY(10px)' },
@@ -120,5 +122,12 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		heroui({
+			accentColor: "purple",
+			grayColor: "slate",
+			darkMode: true,
+		})
+	],
 } satisfies Config;

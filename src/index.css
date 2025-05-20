@@ -33,7 +33,7 @@
     --input: 217 19% 27%;
     --ring: 263 70% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 222 47% 11%; 
     --sidebar-foreground: 210 40% 98%;
@@ -92,5 +92,29 @@
   
   .text-gradient-primary {
     @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+  }
+
+  .hero-card {
+    @apply bg-white/5 backdrop-filter backdrop-blur-md border border-white/10 rounded-xl shadow-xl;
+  }
+
+  .hero-border {
+    @apply border border-white/10;
+  }
+
+  .hero-glow {
+    @apply relative;
+  }
+
+  .hero-glow:after {
+    @apply content-[''] absolute -z-10 top-0 left-0 right-0 bottom-0 bg-gradient-to-r from-primary/20 to-accent/20 blur-xl opacity-50;
+  }
+
+  .hero-animate-hover {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .hero-text-gradient {
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
   }
 }
