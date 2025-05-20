@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { MessageSquare, Clock, Plus, Menu } from 'lucide-react';
+import { MessageSquare, Clock, Plus, Menu, FileText, BookText, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LayoutProps {
@@ -72,31 +72,82 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
         
         <div className="mt-6 px-3">
-          <Link 
-            to="/" 
-            className={cn(
-              "flex items-center space-x-3 px-3 py-2 rounded-lg mb-1 transition-all",
-              isActive('/') 
-                ? "bg-primary/20 text-white" 
-                : "text-white/70 hover:bg-secondary/50 hover:text-white"
-            )}
-          >
-            <MessageSquare size={18} />
-            <span>Chat</span>
-          </Link>
+          {/* Seção principal */}
+          <div className="mb-6">
+            <h2 className="text-xs uppercase tracking-wider text-white/50 px-3 mb-2">Principal</h2>
+            <Link 
+              to="/" 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg mb-1 transition-all",
+                isActive('/') 
+                  ? "bg-primary/20 text-white" 
+                  : "text-white/70 hover:bg-secondary/50 hover:text-white"
+              )}
+            >
+              <MessageSquare size={18} />
+              <span>Chat</span>
+            </Link>
+            
+            <Link 
+              to="/history" 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all mb-1",
+                isActive('/history') 
+                  ? "bg-primary/20 text-white" 
+                  : "text-white/70 hover:bg-secondary/50 hover:text-white"
+              )}
+            >
+              <Clock size={18} />
+              <span>Histórico</span>
+            </Link>
+          </div>
           
-          <Link 
-            to="/history" 
-            className={cn(
-              "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all",
-              isActive('/history') 
-                ? "bg-primary/20 text-white" 
-                : "text-white/70 hover:bg-secondary/50 hover:text-white"
-            )}
-          >
-            <Clock size={18} />
-            <span>Histórico</span>
-          </Link>
+          {/* Seção de conhecimento */}
+          <div className="mb-6">
+            <h2 className="text-xs uppercase tracking-wider text-white/50 px-3 mb-2">Conhecimento</h2>
+            <Link 
+              to="/documents" 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all mb-1",
+                isActive('/documents') 
+                  ? "bg-primary/20 text-white" 
+                  : "text-white/70 hover:bg-secondary/50 hover:text-white"
+              )}
+            >
+              <FileText size={18} />
+              <span>Documentos</span>
+            </Link>
+            
+            <Link 
+              to="/requirements" 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all mb-1",
+                isActive('/requirements') 
+                  ? "bg-primary/20 text-white" 
+                  : "text-white/70 hover:bg-secondary/50 hover:text-white"
+              )}
+            >
+              <BookText size={18} />
+              <span>Requisitos</span>
+            </Link>
+          </div>
+          
+          {/* Seção técnica */}
+          <div>
+            <h2 className="text-xs uppercase tracking-wider text-white/50 px-3 mb-2">Sistema</h2>
+            <Link 
+              to="/infrastructure" 
+              className={cn(
+                "flex items-center space-x-3 px-3 py-2 rounded-lg transition-all",
+                isActive('/infrastructure') 
+                  ? "bg-primary/20 text-white" 
+                  : "text-white/70 hover:bg-secondary/50 hover:text-white"
+              )}
+            >
+              <Database size={18} />
+              <span>Infraestrutura</span>
+            </Link>
+          </div>
         </div>
         
         <div className="mt-auto p-4">

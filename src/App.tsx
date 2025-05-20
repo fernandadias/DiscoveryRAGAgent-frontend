@@ -7,8 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Chat from "@/pages/Chat";
 import History from "@/pages/History";
+import Documents from "@/pages/Documents";
+import Requirements from "@/pages/Requirements";
+import Infrastructure from "@/pages/Infrastructure";
 import NotFound from "./pages/NotFound";
-import { useState } from "react";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,9 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Chat />} />
               <Route path="/history" element={<History />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/requirements" element={<Requirements />} />
+              <Route path="/infrastructure" element={<Infrastructure />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
