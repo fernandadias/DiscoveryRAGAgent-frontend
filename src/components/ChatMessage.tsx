@@ -60,7 +60,7 @@ const renderChart = (chartConfig: string) => {
                 key={i}
                 type="monotone" 
                 dataKey={dataset.label} 
-                stroke={['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA'][i % 4]} 
+                stroke={['#ffffff', '#cccccc', '#999999', '#666666'][i % 4]} 
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -88,7 +88,7 @@ const renderChart = (chartConfig: string) => {
               <Bar 
                 key={i} 
                 dataKey={dataset.label} 
-                fill={['#9b87f5', '#7E69AB', '#6E59A5', '#D6BCFA'][i % 4]} 
+                fill={['#ffffff', '#cccccc', '#999999', '#666666'][i % 4]} 
                 radius={[4, 4, 0, 0]} 
               />
             ))}
@@ -107,19 +107,19 @@ const renderChart = (chartConfig: string) => {
 const Callout = ({ children, type = 'info' }: { children: React.ReactNode; type?: 'info' | 'warning' | 'success' }) => {
   const styles = {
     info: {
-      bg: 'bg-primary/10',
-      border: 'border-primary/30',
-      icon: <Info size={20} className="text-primary" />
+      bg: 'bg-white/10',
+      border: 'border-white/30',
+      icon: <Info size={20} className="text-white" />
     },
     warning: {
-      bg: 'bg-amber-400/10',
-      border: 'border-amber-400/30',
-      icon: <AlertCircle size={20} className="text-amber-400" />
+      bg: 'bg-white/10',
+      border: 'border-white/30',
+      icon: <AlertCircle size={20} className="text-white" />
     },
     success: {
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/30',
-      icon: <CheckCircle size={20} className="text-green-500" />
+      bg: 'bg-white/10',
+      border: 'border-white/30',
+      icon: <CheckCircle size={20} className="text-white" />
     }
   };
 
@@ -184,7 +184,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
       return <p className="my-2 leading-relaxed">{children}</p>;
     },
     blockquote: ({ children }: { children: React.ReactNode }) => (
-      <div className="pl-4 border-l-2 border-primary/50 italic my-4 text-white/80">{children}</div>
+      <div className="pl-4 border-l-2 border-white/50 italic my-4 text-white/80">{children}</div>
     ),
     ul: ({ children }: { children: React.ReactNode }) => (
       <ul className="list-disc pl-6 my-3 space-y-1">{children}</ul>
@@ -220,7 +220,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
   if (isUser) {
     return (
       <div className="flex justify-end mb-4 animate-fade-in">
-        <div className="bg-primary/10 p-4 rounded-lg max-w-[80%] shadow-sm">
+        <div className="bg-white/10 p-4 rounded-lg max-w-[80%] shadow-sm">
           <p className="text-white">{content}</p>
         </div>
       </div>
@@ -233,9 +233,9 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
         {isLoading ? (
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
-              <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
+              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
+              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
+              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
             </div>
             <p className="text-white/70 italic">A IA está elaborando uma resposta...</p>
           </div>
@@ -261,7 +261,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                 onClick={() => setLiked(true)} 
                 variant="ghost"
                 size="sm"
-                color={liked === true ? "primary" : "default"}
+                color={liked === true ? "default" : "default"}
                 className="transition-all mr-2 p-1"
               >
                 <ThumbsUp size={18} />
@@ -274,14 +274,14 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                 }}
                 variant="ghost"
                 size="sm"
-                color={liked === false ? "danger" : "default"}
+                color={liked === false ? "default" : "default"}
                 className="transition-all p-1"
               >
                 <ThumbsDown size={18} />
               </Button>
               
               <Modal 
-                open={isModalOpen} 
+                isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)}
               >
                 <div className="bg-background p-6 rounded-lg max-w-md w-full mx-auto">
@@ -294,7 +294,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                         key={option.id}
                         onClick={() => toggleFeedbackOption(option.id)}
                         variant={selectedFeedback.includes(option.id) ? "solid" : "bordered"}
-                        color={selectedFeedback.includes(option.id) ? "primary" : "default"}
+                        color={selectedFeedback.includes(option.id) ? "default" : "default"}
                         size="sm"
                       >
                         {option.label}
@@ -305,12 +305,12 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Comentários adicionais (opcional)"
-                    className="w-full bg-secondary/30 border border-secondary rounded-md px-3 py-2 mt-2 mb-4 text-sm resize-none h-24 focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-secondary/30 border border-secondary rounded-md px-3 py-2 mt-2 mb-4 text-sm resize-none h-24 focus:outline-none focus:ring-1 focus:ring-white"
                     rows={3}
                   />
                   <div className="flex justify-end">
                     <Button 
-                      color="primary" 
+                      color="default" 
                       onClick={handleFeedbackSubmit}
                     >
                       Enviar feedback

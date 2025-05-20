@@ -15,7 +15,7 @@ interface ChatSourceReferenceProps {
 const ChatSourceReference = ({ source }: ChatSourceReferenceProps) => {
   return (
     <div 
-      className="p-3 bg-secondary/20 rounded-md border-l-2 border-primary/50 hero-card"
+      className="p-3 bg-secondary/20 rounded-md border-l-2 border-white/50 hero-card"
     >
       <div className="flex items-center justify-between mb-1">
         <p className="font-medium text-sm">{source.name}</p>
@@ -23,7 +23,7 @@ const ChatSourceReference = ({ source }: ChatSourceReferenceProps) => {
           href={source.link} 
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center text-xs text-primary hover:underline"
+          className="flex items-center text-xs text-white hover:underline"
         >
           <span className="mr-1">Fonte</span>
           <ExternalLink size={12} />

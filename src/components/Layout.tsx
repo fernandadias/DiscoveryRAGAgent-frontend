@@ -78,7 +78,7 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="space-y-1">
                 <Link to="/" className={cn(
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
-                  isActive('/') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                  isActive('/') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
                   <MessageSquare size={18} />
                   <span>Chat</span>
@@ -86,7 +86,7 @@ const Layout = ({ children }: LayoutProps) => {
                 
                 <Link to="/history" className={cn(
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
-                  isActive('/history') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                  isActive('/history') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
                   <Clock size={18} />
                   <span>Histórico</span>
@@ -99,7 +99,7 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="space-y-1">
                 <Link to="/documents" className={cn(
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
-                  isActive('/documents') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                  isActive('/documents') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
                   <FileText size={18} />
                   <span>Documentos</span>
@@ -107,7 +107,7 @@ const Layout = ({ children }: LayoutProps) => {
                 
                 <Link to="/requirements" className={cn(
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
-                  isActive('/requirements') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                  isActive('/requirements') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
                   <BookText size={18} />
                   <span>Requisitos</span>
@@ -120,7 +120,7 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="space-y-1">
                 <Link to="/infrastructure" className={cn(
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
-                  isActive('/infrastructure') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                  isActive('/infrastructure') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
                   <Database size={18} />
                   <span>Infraestrutura</span>
@@ -133,9 +133,9 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="p-4 border-t border-sidebar-border mt-auto">
           <Button 
             color="primary" 
-            className="w-full"
-            leftIcon={<Plus size={18} />}
+            className="w-full flex items-center gap-2"
           >
+            <Plus size={18} />
             Nova conversa
           </Button>
         </div>

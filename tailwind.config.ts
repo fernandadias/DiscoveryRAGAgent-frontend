@@ -125,7 +125,7 @@ export default {
 	plugins: [
 		require("tailwindcss-animate"),
 		heroui({
-			accentColor: "purple",
+			accentColor: "slate",
 			grayColor: "slate",
 			darkMode: true,
 		})
