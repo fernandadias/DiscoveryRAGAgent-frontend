@@ -1,328 +1,137 @@
-import { useState } from 'react';
-import { ThumbsUp, ThumbsDown, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button, Modal } from '@heroui/react';
-import ChatSourceReference from './ChatSourceReference';
+import React, { useState } from 'react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Button } from '@heroui/react';
+import FeedbackModal from './FeedbackModal';
+import { Source } from '@/hooks/use-api';
 import ReactMarkdown from 'react-markdown';
-import { ChartContainer } from "@/components/ui/chart";
-import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer 
-} from 'recharts';
-
-export interface Source {
-  id: string;
-  name: string;
-  snippet: string;
-  link: string;
-}
+import remarkGfm from 'remark-gfm';
 
 export interface MessageProps {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
-  isLoading?: boolean;
   sources?: Source[];
+  isLoading?: boolean;
 }
 
-const FeedbackOptions = [
-  { id: 'vague', label: 'Resposta vaga' },
-  { id: 'confusing', label: 'Resposta confusa' },
-  { id: 'generic', label: 'Muito genérica' },
-  { id: 'outdated', label: 'Informações desatualizadas' },
-];
+const ChatMessage: React.FC<MessageProps> = ({
+  id,
+  content,
+  isUser,
+  timestamp,
+  sources = [],
+  isLoading = false
+}) => {
+  const [showSources, setShowSources] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackGiven, setFeedbackGiven] = useState<'positive' | 'negative' | null>(null);
 
-// Função para renderizar os gráficos a partir de markdown code blocks
-const renderChart = (chartConfig: string) => {
-  try {
-    const configStr = chartConfig.trim();
-    const parsedConfig = eval(`(${configStr})`);
-    
-    if (parsedConfig.type === 'line') {
-      return (
-        <ResponsiveContainer width="100%" height={220}>
-          <LineChart data={parsedConfig.data.labels.map((label: string, i: number) => {
-            const dataPoint: any = { name: label };
-            parsedConfig.data.datasets.forEach((dataset: any, j: number) => {
-              dataPoint[dataset.label] = dataset.data[i];
-            });
-            return dataPoint;
-          })}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis dataKey="name" stroke="#666" />
-            <YAxis stroke="#666" />
-            <Tooltip contentStyle={{ backgroundColor: '#222', border: '1px solid #444' }} />
-            <Legend />
-            {parsedConfig.data.datasets.map((dataset: any, i: number) => (
-              <Line 
-                key={i}
-                type="monotone" 
-                dataKey={dataset.label} 
-                stroke={['#ffffff', '#cccccc', '#999999', '#666666'][i % 4]} 
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      );
-    } else if (parsedConfig.type === 'bar') {
-      return (
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={parsedConfig.data.labels.map((label: string, i: number) => {
-            const dataPoint: any = { name: label };
-            parsedConfig.data.datasets.forEach((dataset: any, j: number) => {
-              dataPoint[dataset.label] = dataset.data[i];
-            });
-            return dataPoint;
-          })}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            <XAxis dataKey="name" stroke="#666" />
-            <YAxis stroke="#666" />
-            <Tooltip contentStyle={{ backgroundColor: '#222', border: '1px solid #444' }} />
-            <Legend />
-            {parsedConfig.data.datasets.map((dataset: any, i: number) => (
-              <Bar 
-                key={i} 
-                dataKey={dataset.label} 
-                fill={['#ffffff', '#cccccc', '#999999', '#666666'][i % 4]} 
-                radius={[4, 4, 0, 0]} 
-              />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
-      );
-    }
-    return null;
-  } catch (error) {
-    console.error("Error rendering chart:", error);
-    return <div className="text-destructive text-xs">Erro ao renderizar gráfico</div>;
-  }
-};
-
-// Componente personalizado para renderizar callouts
-const Callout = ({ children, type = 'info' }: { children: React.ReactNode; type?: 'info' | 'warning' | 'success' }) => {
-  const styles = {
-    info: {
-      bg: 'bg-white/10',
-      border: 'border-white/30',
-      icon: <Info size={20} className="text-green-400" />
-    },
-    warning: {
-      bg: 'bg-white/10',
-      border: 'border-white/30',
-      icon: <AlertCircle size={20} className="text-green-400" />
-    },
-    success: {
-      bg: 'bg-white/10',
-      border: 'border-white/30',
-      icon: <CheckCircle size={20} className="text-green-400" />
-    }
+  const handlePositiveFeedback = () => {
+    setFeedbackGiven('positive');
+    // Em uma implementação real, enviar feedback positivo para o backend
   };
 
-  const style = styles[type];
-  
-  return (
-    <div 
-      className={`${style.bg} ${style.border} border-l-4 rounded-md my-4 p-4`}
-    >
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5">{style.icon}</div>
-        <p className="text-sm">{children}</p>
-      </div>
-    </div>
-  );
-};
-
-const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
-  const [liked, setLiked] = useState<boolean | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState<string[]>([]);
-  const [comment, setComment] = useState('');
-
-  const toggleFeedbackOption = (id: string) => {
-    setSelectedFeedback(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id) 
-        : [...prev, id]
-    );
+  const handleNegativeFeedback = () => {
+    setFeedbackModalOpen(true);
+    setFeedbackGiven('negative');
   };
 
-  const handleFeedbackSubmit = () => {
-    console.log('Feedback submitted:', { selectedFeedback, comment });
-    setIsModalOpen(false);
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
-
-  // Componentes de renderização customizados para markdown
-  const renderers = {
-    h1: ({ children }: { children: React.ReactNode }) => (
-      <h1 className="text-2xl font-bold mt-6 mb-3 pb-2 border-b border-white/10 text-green-400">{children}</h1>
-    ),
-    h2: ({ children }: { children: React.ReactNode }) => (
-      <h2 className="text-xl font-bold mt-5 mb-3 text-green-400">{children}</h2>
-    ),
-    h3: ({ children }: { children: React.ReactNode }) => (
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-green-400">{children}</h3>
-    ),
-    p: ({ children }: { children: React.ReactNode }) => {
-      const text = children?.toString() || '';
-      
-      if (text.startsWith(':::info')) {
-        const content = text.replace(':::info', '');
-        return <Callout type="info">{content}</Callout>;
-      } else if (text.startsWith(':::warning')) {
-        const content = text.replace(':::warning', '');
-        return <Callout type="warning">{content}</Callout>;
-      } else if (text.startsWith(':::success')) {
-        const content = text.replace(':::success', '');
-        return <Callout type="success">{content}</Callout>;
-      }
-      
-      return <p className="my-2 leading-relaxed">{children}</p>;
-    },
-    blockquote: ({ children }: { children: React.ReactNode }) => (
-      <div className="pl-4 border-l-2 border-green-400 italic my-4 text-white/80">{children}</div>
-    ),
-    ul: ({ children }: { children: React.ReactNode }) => (
-      <ul className="list-disc pl-6 my-3 space-y-1">{children}</ul>
-    ),
-    ol: ({ children }: { children: React.ReactNode }) => (
-      <ol className="list-decimal pl-6 my-3 space-y-1">{children}</ol>
-    ),
-    li: ({ children }: { children: React.ReactNode }) => (
-      <li className="my-1">{children}</li>
-    ),
-    hr: () => <hr className="my-4 border-green-400/30" />,
-    code: ({ node, inline, className, children, ...props }: any) => {
-      // Verificando se é um code block de gráfico
-      const match = /language-chart/.exec(className || '');
-      if (match) {
-        return renderChart(children.toString());
-      }
-      
-      if (inline) {
-        return <code className="bg-secondary/50 px-1.5 py-0.5 rounded-sm text-sm font-mono text-green-400" {...props}>{children}</code>;
-      }
-      
-      return (
-        <div className="my-4 bg-secondary/30 p-4 rounded-md">
-          <pre className="overflow-auto text-sm font-mono text-green-400">
-            <code {...props}>{children}</code>
-          </pre>
-        </div>
-      );
-    }
-  };
-
-  if (isUser) {
-    return (
-      <div className="flex justify-end mb-4 animate-fade-in">
-        <div className="bg-white/10 p-4 rounded-lg max-w-[80%] shadow-sm">
-          <p className="text-white">{content}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className={cn("flex flex-col mb-6 animate-fade-in", isLoading ? "opacity-80" : "")}>
-      <div className="bg-secondary/30 p-4 rounded-lg max-w-[90%] shadow-sm relative hero-card">
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`rounded-lg p-4 max-w-[80%] ${isUser ? 'bg-green-600/20 text-white' : 'bg-white/10 text-white'}`}>
+        <div className="flex items-center gap-2 mb-1">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${isUser ? 'bg-green-600/30' : 'bg-white/20'}`}>
+            {isUser ? 'U' : 'AI'}
+          </div>
+          <span className="text-xs text-white/50">{formatTime(timestamp)}</span>
+        </div>
+        
         {isLoading ? (
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
-            </div>
-            <p className="text-white/70 italic">A IA está elaborando uma resposta...</p>
+          <div className="flex items-center space-x-2 py-2">
+            <div className="w-2 h-2 rounded-full bg-white/50 animate-pulse"></div>
+            <div className="w-2 h-2 rounded-full bg-white/50 animate-pulse delay-75"></div>
+            <div className="w-2 h-2 rounded-full bg-white/50 animate-pulse delay-150"></div>
           </div>
         ) : (
-          <>
-            <div className="prose prose-invert prose-sm max-w-none">
-              <ReactMarkdown components={renderers}>{content}</ReactMarkdown>
+          <div className="prose prose-invert max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </div>
+        )}
+        
+        {!isUser && !isLoading && (
+          <div className="mt-3 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between">
+              {sources && sources.length > 0 && (
+                <button
+                  onClick={() => setShowSources(!showSources)}
+                  className="text-xs text-white/50 hover:text-white/80"
+                >
+                  {showSources ? 'Ocultar fontes' : `Mostrar fontes (${sources.length})`}
+                </button>
+              )}
+              
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={handlePositiveFeedback}
+                  disabled={feedbackGiven !== null}
+                  className={`p-1 ${feedbackGiven === 'positive' ? 'text-green-400' : 'text-white/50 hover:text-white/80'}`}
+                >
+                  <ThumbsUp size={14} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={handleNegativeFeedback}
+                  disabled={feedbackGiven !== null}
+                  className={`p-1 ${feedbackGiven === 'negative' ? 'text-red-400' : 'text-white/50 hover:text-white/80'}`}
+                >
+                  <ThumbsDown size={14} />
+                </Button>
+              </div>
             </div>
             
-            {sources && sources.length > 0 && (
-              <div className="mt-4 pt-3 border-t border-white/10">
-                <p className="text-green-400 text-sm mb-2">Fontes utilizadas:</p>
-                <div className="flex flex-col gap-2">
-                  {sources.map(source => (
-                    <ChatSourceReference key={source.id} source={source} />
+            {showSources && (
+              <div className="mt-2 space-y-2">
+                <h4 className="text-xs font-medium text-white/70">Fontes utilizadas:</h4>
+                <div className="space-y-2">
+                  {sources.map((source) => (
+                    <div key={source.id} className="bg-white/5 p-2 rounded text-xs">
+                      <div className="font-medium text-white/90">{source.name}</div>
+                      <div className="text-white/70 mt-1">{source.snippet}</div>
+                      {source.link && (
+                        <a 
+                          href={source.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:underline mt-1 inline-block"
+                        >
+                          Ver documento
+                        </a>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
             )}
-            
-            <div className="flex items-center mt-3 pt-3 border-t border-white/10">
-              <Button 
-                onClick={() => setLiked(true)} 
-                variant="ghost"
-                size="sm"
-                color={liked === true ? "default" : "default"}
-                className="transition-all mr-2 p-1 text-green-400"
-              >
-                <ThumbsUp size={18} />
-              </Button>
-              
-              <Button 
-                onClick={() => {
-                  setLiked(false);
-                  setIsModalOpen(true);
-                }}
-                variant="ghost"
-                size="sm"
-                color={liked === false ? "default" : "default"}
-                className="transition-all p-1 text-green-400"
-              >
-                <ThumbsDown size={18} />
-              </Button>
-              
-              <Modal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)}
-              >
-                <div className="bg-background p-6 rounded-lg max-w-md w-full mx-auto">
-                  <h3 className="text-lg font-medium mb-4 text-green-400">Como podemos melhorar?</h3>
-                  <div 
-                    className="grid grid-cols-2 gap-2 my-4"
-                  >
-                    {FeedbackOptions.map(option => (
-                      <Button
-                        key={option.id}
-                        onClick={() => toggleFeedbackOption(option.id)}
-                        variant={selectedFeedback.includes(option.id) ? "solid" : "bordered"}
-                        color={selectedFeedback.includes(option.id) ? "default" : "default"}
-                        size="sm"
-                        className={selectedFeedback.includes(option.id) ? "text-green-400" : ""}
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
-                  </div>
-                  <textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Comentários adicionais (opcional)"
-                    className="w-full bg-secondary/30 border border-secondary rounded-md px-3 py-2 mt-2 mb-4 text-sm resize-none h-24 focus:outline-none focus:ring-1 focus:ring-green-400"
-                    rows={3}
-                  />
-                  <div className="flex justify-end">
-                    <Button 
-                      color="default" 
-                      onClick={handleFeedbackSubmit}
-                      className="text-green-400 hover:bg-green-400/20"
-                    >
-                      Enviar feedback
-                    </Button>
-                  </div>
-                </div>
-              </Modal>
-            </div>
-          </>
+          </div>
         )}
       </div>
+      
+      {/* Feedback Modal */}
+      <FeedbackModal 
+        isOpen={feedbackModalOpen} 
+        onClose={() => setFeedbackModalOpen(false)} 
+        messageId={id}
+      />
     </div>
   );
 };

@@ -1,42 +1,37 @@
-
-import { useState } from 'react';
-import { Button } from '@heroui/react';
-
-type Objective = {
-  id: string;
-  label: string;
-};
+import React from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@heroui/react';
 
 interface ChatObjectiveSelectorProps {
-  objectives: Objective[];
-  onSelect: (objective: string) => void;
+  objectives: { id: string; label: string }[];
+  selectedObjective: string | null;
+  onSelect: (objectiveId: string) => void;
 }
 
-const ChatObjectiveSelector = ({ objectives, onSelect }: ChatObjectiveSelectorProps) => {
-  const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
-
-  const handleSelect = (objectiveId: string) => {
-    setSelectedObjective(objectiveId);
-    onSelect(objectiveId);
-  };
-
+const ChatObjectiveSelector: React.FC<ChatObjectiveSelectorProps> = ({
+  objectives,
+  selectedObjective,
+  onSelect
+}) => {
   return (
-    <div className="flex flex-wrap gap-2 mb-4 p-2">
-      {objectives.map((objective) => (
-        <Button
-          key={objective.id}
-          onClick={() => handleSelect(objective.id)}
-          variant={selectedObjective === objective.id ? "solid" : "ghost"}
-          size="sm"
-          className={`animate-fade-in rounded-full ${
-            selectedObjective === objective.id 
-              ? 'bg-white/20 text-green-400 border border-green-400/50' 
-              : 'text-white hover:text-green-400'
-          }`}
-        >
-          {objective.label}
-        </Button>
-      ))}
+    <div className="w-full max-w-xs">
+      <label className="block text-sm font-medium text-white/70 mb-1">
+        Objetivo da conversa
+      </label>
+      <Select
+        value={selectedObjective || undefined}
+        onValueChange={onSelect}
+      >
+        <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+          <SelectValue placeholder="Selecione um objetivo" />
+        </SelectTrigger>
+        <SelectContent>
+          {objectives.map((objective) => (
+            <SelectItem key={objective.id} value={objective.id}>
+              {objective.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
