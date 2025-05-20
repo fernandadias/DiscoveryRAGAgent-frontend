@@ -44,7 +44,14 @@ api.interceptors.response.use(
 // Função para realizar login
 export const login = async (username: string, password: string) => {
   try {
-    const response = await api.post('/api/login', { username, password });
+    // Usar URL completa para o endpoint de login para evitar problemas de roteamento
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const response = await axios.post(`${baseUrl}/api/login`, { username, password }, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
     const { access_token } = response.data;
     
     // Armazenar o token no localStorage
