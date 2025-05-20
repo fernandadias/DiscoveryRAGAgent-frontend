@@ -1,7 +1,6 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, Server, HardDrive, BookText } from 'lucide-react';
 
 const Infrastructure = () => {
   return (
@@ -12,7 +11,6 @@ const Infrastructure = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <Server className="h-10 w-10 mb-2 text-primary/80" />
             <h3 className="text-white font-medium">GPT-4o</h3>
             <p className="text-white/60 text-sm">Modelo LLM</p>
           </CardContent>
@@ -20,7 +18,6 @@ const Infrastructure = () => {
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <Database className="h-10 w-10 mb-2 text-primary/80" />
             <h3 className="text-white font-medium">Pinecone</h3>
             <p className="text-white/60 text-sm">Banco de Dados Vetorial</p>
           </CardContent>
@@ -28,7 +25,6 @@ const Infrastructure = () => {
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <HardDrive className="h-10 w-10 mb-2 text-primary/80" />
             <h3 className="text-white font-medium">Chunk Hybrid</h3>
             <p className="text-white/60 text-sm">Processamento RAG</p>
           </CardContent>
@@ -36,7 +32,6 @@ const Infrastructure = () => {
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <BookText className="h-10 w-10 mb-2 text-primary/80" />
             <h3 className="text-white font-medium">38 Documentos</h3>
             <p className="text-white/60 text-sm">Base de Conhecimento</p>
           </CardContent>

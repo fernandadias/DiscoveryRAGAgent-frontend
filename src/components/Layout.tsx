@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { MessageSquare, Clock, Plus, Menu, FileText, BookText, Database } from 'lucide-react';
+import { Plus, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@heroui/react';
 
@@ -80,7 +80,6 @@ const Layout = ({ children }: LayoutProps) => {
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
                   isActive('/') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
-                  <MessageSquare size={18} />
                   <span>Chat</span>
                 </Link>
                 
@@ -88,7 +87,6 @@ const Layout = ({ children }: LayoutProps) => {
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
                   isActive('/history') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
-                  <Clock size={18} />
                   <span>Histórico</span>
                 </Link>
               </div>
@@ -101,7 +99,6 @@ const Layout = ({ children }: LayoutProps) => {
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
                   isActive('/documents') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
-                  <FileText size={18} />
                   <span>Documentos</span>
                 </Link>
                 
@@ -109,7 +106,6 @@ const Layout = ({ children }: LayoutProps) => {
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
                   isActive('/requirements') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
-                  <BookText size={18} />
                   <span>Requisitos</span>
                 </Link>
               </div>
@@ -122,7 +118,6 @@ const Layout = ({ children }: LayoutProps) => {
                   "flex items-center space-x-2 p-2 rounded-md transition-colors",
                   isActive('/infrastructure') ? "bg-sidebar-accent text-white" : "hover:bg-sidebar-accent/50"
                 )}>
-                  <Database size={18} />
                   <span>Infraestrutura</span>
                 </Link>
               </div>
@@ -141,10 +136,9 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
       </div>
       
-      {/* Main content */}
+      {/* Main content - Removed margin left */}
       <main className={cn(
-        "flex-1 flex flex-col overflow-hidden transition-all duration-300",
-        isSidebarOpen && !isMobile ? "ml-60" : "ml-0"
+        "flex-1 flex flex-col overflow-hidden transition-all duration-300"
       )}>
         {children}
       </main>

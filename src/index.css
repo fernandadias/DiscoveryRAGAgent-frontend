@@ -91,7 +91,7 @@
   }
   
   .text-gradient-primary {
-    @apply bg-gradient-to-br from-white via-white/80 to-white/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-green-400 via-green-300 to-green-200 bg-clip-text text-transparent;
   }
 
   .hero-card {
@@ -115,6 +115,6 @@
   }
 
   .hero-text-gradient {
-    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-green-400 via-green-300 to-green-200 bg-clip-text text-transparent;
   }
 }

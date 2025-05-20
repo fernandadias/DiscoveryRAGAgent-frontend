@@ -29,7 +29,9 @@ const ChatObjectiveSelector = ({ objectives, onSelect }: ChatObjectiveSelectorPr
           variant={selectedObjective === objective.id ? "solid" : "ghost"}
           color={selectedObjective === objective.id ? "default" : "default"}
           size="sm"
-          className="animate-fade-in rounded-full"
+          className={`animate-fade-in rounded-full ${
+            selectedObjective === objective.id ? 'bg-white/20 text-white' : ''
+          }`}
         >
           {objective.label}
         </Button>
