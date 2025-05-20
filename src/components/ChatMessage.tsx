@@ -5,9 +5,6 @@ import FeedbackModal from './FeedbackModal';
 import { Source } from '@/hooks/use-api';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.css';
 
 export interface MessageProps {
   id: string;
@@ -91,10 +88,10 @@ const ChatMessage: React.FC<MessageProps> = ({
 
   // Processamento de callouts personalizados
   const processedContent = !isUser ? content
-    .replace(/:::info\s+([\s\S]*?):::/g, '<div class="callout info"><div class="callout-icon"><span>ℹ️</span></div><div class="callout-content">$1</div></div>')
-    .replace(/:::warning\s+([\s\S]*?):::/g, '<div class="callout warning"><div class="callout-icon"><span>⚠️</span></div><div class="callout-content">$1</div></div>')
-    .replace(/:::success\s+([\s\S]*?):::/g, '<div class="callout success"><div class="callout-icon"><span>✅</span></div><div class="callout-content">$1</div></div>')
-    .replace(/:::error\s+([\s\S]*?):::/g, '<div class="callout error"><div class="callout-icon"><span>❌</span></div><div class="callout-content">$1</div></div>')
+    .replace(/:::info\s+([\s\S]*?):::/g, '<div class="p-3 bg-blue-500/10 border-l-4 border-blue-500 rounded my-4"><div class="font-bold text-blue-400 mb-1">ℹ️ Informação</div>$1</div>')
+    .replace(/:::warning\s+([\s\S]*?):::/g, '<div class="p-3 bg-yellow-500/10 border-l-4 border-yellow-500 rounded my-4"><div class="font-bold text-yellow-400 mb-1">⚠️ Atenção</div>$1</div>')
+    .replace(/:::success\s+([\s\S]*?):::/g, '<div class="p-3 bg-green-500/10 border-l-4 border-green-500 rounded my-4"><div class="font-bold text-green-400 mb-1">✅ Sucesso</div>$1</div>')
+    .replace(/:::error\s+([\s\S]*?):::/g, '<div class="p-3 bg-red-500/10 border-l-4 border-red-500 rounded my-4"><div class="font-bold text-red-400 mb-1">❌ Erro</div>$1</div>')
     : content;
 
   return (
@@ -122,7 +119,6 @@ const ChatMessage: React.FC<MessageProps> = ({
           <div className="prose prose-invert max-w-none markdown-custom">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw, rehypeHighlight]}
               components={components}
             >
               {processedContent}
