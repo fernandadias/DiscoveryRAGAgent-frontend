@@ -1,6 +1,5 @@
 
 import { ExternalLink } from 'lucide-react';
-import { Box, Text, Flex, Link } from '@heroui/react';
 
 interface Source {
   id: string;
@@ -15,34 +14,25 @@ interface ChatSourceReferenceProps {
 
 const ChatSourceReference = ({ source }: ChatSourceReferenceProps) => {
   return (
-    <Box 
-      p={3} 
-      bg="secondary/20" 
-      borderRadius="md" 
-      borderLeft="2px solid" 
-      borderColor="primary/50"
-      className="hero-card"
+    <div 
+      className="p-3 bg-secondary/20 rounded-md border-l-2 border-primary/50 hero-card"
     >
-      <Flex alignItems="center" justifyContent="space-between" mb={1}>
-        <Text fontWeight="medium" fontSize="sm">{source.name}</Text>
-        <Link 
+      <div className="flex items-center justify-between mb-1">
+        <p className="font-medium text-sm">{source.name}</p>
+        <a 
           href={source.link} 
           target="_blank"
           rel="noopener noreferrer"
-          display="flex"
-          alignItems="center"
-          fontSize="xs"
-          color="primary"
-          _hover={{ textDecoration: 'underline' }}
+          className="flex items-center text-xs text-primary hover:underline"
         >
-          <Text mr={1}>Fonte</Text>
+          <span className="mr-1">Fonte</span>
           <ExternalLink size={12} />
-        </Link>
-      </Flex>
-      <Text fontSize="xs" color="white/70" lineHeight="relaxed">
+        </a>
+      </div>
+      <p className="text-xs text-white/70 leading-relaxed">
         {source.snippet}
-      </Text>
-    </Box>
+      </p>
+    </div>
   );
 };
 

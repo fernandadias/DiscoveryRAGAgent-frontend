@@ -1,6 +1,6 @@
 
 import type { Config } from "tailwindcss";
-import { heroui } from "@heroui/themes";
+import { heroui } from "@heroui/react";
 
 export default {
 	darkMode: ["class"],

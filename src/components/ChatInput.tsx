@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import { Button, Input, Box, Text, Flex } from '@heroui/react';
+import { Button, Input } from '@heroui/react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -43,36 +43,28 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
   };
 
   return (
-    <Box width="full">
+    <div className="w-full">
       {suggestions.length > 0 && message.length === 0 && (
-        <Box mb={4}>
-          <Text size="sm" color="muted" mb={2}>Sugestões para iniciar:</Text>
-          <Flex wrap="wrap" gap={2}>
+        <div className="mb-4">
+          <p className="text-sm text-muted-foreground mb-2">Sugestões para iniciar:</p>
+          <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion, index) => (
               <Button
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
-                variant="subtle"
+                variant="ghost"
                 size="sm"
-                color="muted"
+                color="default"
               >
                 {suggestion}
               </Button>
             ))}
-          </Flex>
-        </Box>
+          </div>
+        </div>
       )}
       
-      <Box 
-        position="relative" 
-        display="flex" 
-        alignItems="end" 
-        bg="bg-secondary/30" 
-        rounded="lg" 
-        border="1px solid"
-        borderColor="secondary"
-        p={2}
-        className="focus-within:border-primary transition-colors"
+      <div 
+        className="relative flex items-end bg-secondary/30 rounded-lg border border-secondary p-2 focus-within:border-primary transition-colors"
       >
         <textarea
           ref={inputRef}
@@ -87,16 +79,15 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
         <Button
           onClick={handleSendMessage}
           disabled={!message.trim() || isLoading}
-          colorScheme={!message.trim() || isLoading ? "gray" : "primary"}
           variant="solid"
+          color={!message.trim() || isLoading ? "default" : "primary"}
           className="ml-2"
-          isDisabled={!message.trim() || isLoading}
           aria-label="Enviar mensagem"
         >
           <Send size={18} />
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HeroProvider } from "@heroui/react";
+import { HeroUIProvider } from "@heroui/react";
 import Layout from "@/components/Layout";
 import Chat from "@/pages/Chat";
 import History from "@/pages/History";
@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <HeroProvider>
+    <HeroUIProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -36,7 +36,7 @@ const App = () => {
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
-    </HeroProvider>
+    </HeroUIProvider>
   );
 };
 

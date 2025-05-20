@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ButtonGroup, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
 
 type Objective = {
   id: string;
@@ -21,21 +21,20 @@ const ChatObjectiveSelector = ({ objectives, onSelect }: ChatObjectiveSelectorPr
   };
 
   return (
-    <ButtonGroup gap={2} className="flex flex-wrap mb-4 p-2">
+    <div className="flex flex-wrap gap-2 mb-4 p-2">
       {objectives.map((objective) => (
         <Button
           key={objective.id}
           onClick={() => handleSelect(objective.id)}
-          variant={selectedObjective === objective.id ? "solid" : "subtle"}
-          colorScheme={selectedObjective === objective.id ? "primary" : "gray"}
+          variant={selectedObjective === objective.id ? "solid" : "ghost"}
+          color={selectedObjective === objective.id ? "primary" : "default"}
           size="sm"
-          className="animate-fade-in"
-          rounded="full"
+          className="animate-fade-in rounded-full"
         >
           {objective.label}
         </Button>
       ))}
-    </ButtonGroup>
+    </div>
   );
 };
 

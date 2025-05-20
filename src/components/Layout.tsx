@@ -3,17 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { MessageSquare, Clock, Plus, Menu, FileText, BookText, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { 
-  Sidebar, 
-  SidebarHeader, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarMenu,
-  SidebarMenuSection,
-  SidebarMenuItem,
-  SidebarMenuLink,
-  Button
-} from '@heroui/react';
+import { Button } from '@heroui/react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -71,72 +61,85 @@ const Layout = ({ children }: LayoutProps) => {
       )}
       
       {/* Sidebar */}
-      <Sidebar 
-        expanded={isSidebarOpen} 
+      <div 
         className={cn(
-          "fixed md:static inset-y-0 left-0 z-20 transition-all duration-300 ease-in-out transform",
+          "fixed md:static inset-y-0 left-0 z-20 transition-all duration-300 ease-in-out transform w-60 bg-sidebar border-r border-sidebar-border",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        <SidebarHeader>
+        <div className="p-4 border-b border-sidebar-border">
           <h1 className="text-xl font-bold text-gradient">Discovery AI</h1>
-        </SidebarHeader>
+        </div>
         
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuSection label="Principal">
-              <SidebarMenuItem active={isActive('/')}>
-                <SidebarMenuLink as={Link} to="/">
+        <div className="flex flex-col h-full p-4 overflow-y-auto">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="text-xs text-gray-500 uppercase tracking-wider">Principal</div>
+              <div className="space-y-1">
+                <Link to="/" className={cn(
+                  "flex items-center space-x-2 p-2 rounded-md transition-colors",
+                  isActive('/') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                )}>
                   <MessageSquare size={18} />
                   <span>Chat</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
-              
-              <SidebarMenuItem active={isActive('/history')}>
-                <SidebarMenuLink as={Link} to="/history">
+                </Link>
+                
+                <Link to="/history" className={cn(
+                  "flex items-center space-x-2 p-2 rounded-md transition-colors",
+                  isActive('/history') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                )}>
                   <Clock size={18} />
                   <span>Histórico</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
-            </SidebarMenuSection>
+                </Link>
+              </div>
+            </div>
             
-            <SidebarMenuSection label="Conhecimento">
-              <SidebarMenuItem active={isActive('/documents')}>
-                <SidebarMenuLink as={Link} to="/documents">
+            <div className="space-y-2">
+              <div className="text-xs text-gray-500 uppercase tracking-wider">Conhecimento</div>
+              <div className="space-y-1">
+                <Link to="/documents" className={cn(
+                  "flex items-center space-x-2 p-2 rounded-md transition-colors",
+                  isActive('/documents') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                )}>
                   <FileText size={18} />
                   <span>Documentos</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
-              
-              <SidebarMenuItem active={isActive('/requirements')}>
-                <SidebarMenuLink as={Link} to="/requirements">
+                </Link>
+                
+                <Link to="/requirements" className={cn(
+                  "flex items-center space-x-2 p-2 rounded-md transition-colors",
+                  isActive('/requirements') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                )}>
                   <BookText size={18} />
                   <span>Requisitos</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
-            </SidebarMenuSection>
+                </Link>
+              </div>
+            </div>
             
-            <SidebarMenuSection label="Sistema">
-              <SidebarMenuItem active={isActive('/infrastructure')}>
-                <SidebarMenuLink as={Link} to="/infrastructure">
+            <div className="space-y-2">
+              <div className="text-xs text-gray-500 uppercase tracking-wider">Sistema</div>
+              <div className="space-y-1">
+                <Link to="/infrastructure" className={cn(
+                  "flex items-center space-x-2 p-2 rounded-md transition-colors",
+                  isActive('/infrastructure') ? "bg-sidebar-accent text-primary" : "hover:bg-sidebar-accent/50"
+                )}>
                   <Database size={18} />
                   <span>Infraestrutura</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
-            </SidebarMenuSection>
-          </SidebarMenu>
-        </SidebarContent>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
         
-        <SidebarFooter>
+        <div className="p-4 border-t border-sidebar-border mt-auto">
           <Button 
-            colorScheme="primary" 
+            color="primary" 
             className="w-full"
             leftIcon={<Plus size={18} />}
           >
             Nova conversa
           </Button>
-        </SidebarFooter>
-      </Sidebar>
+        </div>
+      </div>
       
       {/* Main content */}
       <main className={cn(
