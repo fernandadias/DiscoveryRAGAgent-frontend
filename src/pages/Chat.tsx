@@ -179,7 +179,7 @@ const Chat = () => {
             <div 
               className="w-16 h-16 mb-4 rounded-full bg-white/10 flex items-center justify-center"
             >
-              <span className="text-green-400 text-xl">AI</span>
+              <span className="text-green-400 text-xl">🤘</span>
             </div>
             <h2 className="text-2xl font-bold mb-2 text-white">Agente de IA para Product Discovery</h2>
             <p className="text-white/70 max-w-md">

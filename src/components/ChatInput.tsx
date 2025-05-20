@@ -54,7 +54,6 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
                 onClick={() => handleSuggestionClick(suggestion)}
                 variant="ghost"
                 size="sm"
-                color="default"
               >
                 {suggestion}
               </Button>
