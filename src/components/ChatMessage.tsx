@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { ThumbsUp, ThumbsDown, AlertCircle, Info, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -109,17 +108,17 @@ const Callout = ({ children, type = 'info' }: { children: React.ReactNode; type?
     info: {
       bg: 'bg-white/10',
       border: 'border-white/30',
-      icon: <Info size={20} className="text-white" />
+      icon: <Info size={20} className="text-green-400" />
     },
     warning: {
       bg: 'bg-white/10',
       border: 'border-white/30',
-      icon: <AlertCircle size={20} className="text-white" />
+      icon: <AlertCircle size={20} className="text-green-400" />
     },
     success: {
       bg: 'bg-white/10',
       border: 'border-white/30',
-      icon: <CheckCircle size={20} className="text-white" />
+      icon: <CheckCircle size={20} className="text-green-400" />
     }
   };
 
@@ -159,13 +158,13 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
   // Componentes de renderização customizados para markdown
   const renderers = {
     h1: ({ children }: { children: React.ReactNode }) => (
-      <h1 className="text-2xl font-bold mt-6 mb-3 pb-2 border-b border-white/10 text-white">{children}</h1>
+      <h1 className="text-2xl font-bold mt-6 mb-3 pb-2 border-b border-white/10 text-green-400">{children}</h1>
     ),
     h2: ({ children }: { children: React.ReactNode }) => (
-      <h2 className="text-xl font-bold mt-5 mb-3 text-white/90">{children}</h2>
+      <h2 className="text-xl font-bold mt-5 mb-3 text-green-400">{children}</h2>
     ),
     h3: ({ children }: { children: React.ReactNode }) => (
-      <h3 className="text-lg font-semibold mt-4 mb-2 text-white/90">{children}</h3>
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-green-400">{children}</h3>
     ),
     p: ({ children }: { children: React.ReactNode }) => {
       const text = children?.toString() || '';
@@ -184,7 +183,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
       return <p className="my-2 leading-relaxed">{children}</p>;
     },
     blockquote: ({ children }: { children: React.ReactNode }) => (
-      <div className="pl-4 border-l-2 border-white/50 italic my-4 text-white/80">{children}</div>
+      <div className="pl-4 border-l-2 border-green-400 italic my-4 text-white/80">{children}</div>
     ),
     ul: ({ children }: { children: React.ReactNode }) => (
       <ul className="list-disc pl-6 my-3 space-y-1">{children}</ul>
@@ -195,7 +194,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
     li: ({ children }: { children: React.ReactNode }) => (
       <li className="my-1">{children}</li>
     ),
-    hr: () => <hr className="my-4 border-white/10" />,
+    hr: () => <hr className="my-4 border-green-400/30" />,
     code: ({ node, inline, className, children, ...props }: any) => {
       // Verificando se é um code block de gráfico
       const match = /language-chart/.exec(className || '');
@@ -204,12 +203,12 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
       }
       
       if (inline) {
-        return <code className="bg-secondary/50 px-1.5 py-0.5 rounded-sm text-sm font-mono" {...props}>{children}</code>;
+        return <code className="bg-secondary/50 px-1.5 py-0.5 rounded-sm text-sm font-mono text-green-400" {...props}>{children}</code>;
       }
       
       return (
         <div className="my-4 bg-secondary/30 p-4 rounded-md">
-          <pre className="overflow-auto text-sm font-mono text-white/90">
+          <pre className="overflow-auto text-sm font-mono text-green-400">
             <code {...props}>{children}</code>
           </pre>
         </div>
@@ -233,9 +232,9 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
         {isLoading ? (
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
-              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
-              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
-              <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "0ms" }}></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "150ms" }}></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce-soft" style={{ animationDelay: "300ms" }}></div>
             </div>
             <p className="text-white/70 italic">A IA está elaborando uma resposta...</p>
           </div>
@@ -247,7 +246,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
             
             {sources && sources.length > 0 && (
               <div className="mt-4 pt-3 border-t border-white/10">
-                <p className="text-muted-foreground text-sm mb-2">Fontes utilizadas:</p>
+                <p className="text-green-400 text-sm mb-2">Fontes utilizadas:</p>
                 <div className="flex flex-col gap-2">
                   {sources.map(source => (
                     <ChatSourceReference key={source.id} source={source} />
@@ -262,7 +261,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                 variant="ghost"
                 size="sm"
                 color={liked === true ? "default" : "default"}
-                className="transition-all mr-2 p-1"
+                className="transition-all mr-2 p-1 text-green-400"
               >
                 <ThumbsUp size={18} />
               </Button>
@@ -275,7 +274,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                 variant="ghost"
                 size="sm"
                 color={liked === false ? "default" : "default"}
-                className="transition-all p-1"
+                className="transition-all p-1 text-green-400"
               >
                 <ThumbsDown size={18} />
               </Button>
@@ -285,7 +284,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                 onClose={() => setIsModalOpen(false)}
               >
                 <div className="bg-background p-6 rounded-lg max-w-md w-full mx-auto">
-                  <h3 className="text-lg font-medium mb-4">Como podemos melhorar?</h3>
+                  <h3 className="text-lg font-medium mb-4 text-green-400">Como podemos melhorar?</h3>
                   <div 
                     className="grid grid-cols-2 gap-2 my-4"
                   >
@@ -296,6 +295,7 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                         variant={selectedFeedback.includes(option.id) ? "solid" : "bordered"}
                         color={selectedFeedback.includes(option.id) ? "default" : "default"}
                         size="sm"
+                        className={selectedFeedback.includes(option.id) ? "text-green-400" : ""}
                       >
                         {option.label}
                       </Button>
@@ -305,13 +305,14 @@ const ChatMessage = ({ content, isUser, isLoading, sources }: MessageProps) => {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     placeholder="Comentários adicionais (opcional)"
-                    className="w-full bg-secondary/30 border border-secondary rounded-md px-3 py-2 mt-2 mb-4 text-sm resize-none h-24 focus:outline-none focus:ring-1 focus:ring-white"
+                    className="w-full bg-secondary/30 border border-secondary rounded-md px-3 py-2 mt-2 mb-4 text-sm resize-none h-24 focus:outline-none focus:ring-1 focus:ring-green-400"
                     rows={3}
                   />
                   <div className="flex justify-end">
                     <Button 
                       color="default" 
                       onClick={handleFeedbackSubmit}
+                      className="text-green-400 hover:bg-green-400/20"
                     >
                       Enviar feedback
                     </Button>

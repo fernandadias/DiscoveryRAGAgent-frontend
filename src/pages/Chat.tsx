@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -208,8 +209,7 @@ e da velocidade de resposta às mudanças do mercado.
           <Button 
             variant="bordered" 
             size="sm" 
-            color={isSaved ? "default" : "default"}
-            className={`ml-2 transition-all flex items-center gap-1 ${isSaved ? 'bg-white/10' : ''}`}
+            className={`ml-2 transition-all flex items-center gap-1 ${isSaved ? 'bg-white/10 text-green-400' : 'text-white hover:text-green-400'}`}
             onClick={handleSaveConversation}
           >
             <Save size={16} />
@@ -222,9 +222,9 @@ e da velocidade de resposta às mudanças do mercado.
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div 
-              className="w-16 h-16 mb-4 rounded-full bg-white/10 flex items-center justify-center text-gradient-primary"
+              className="w-16 h-16 mb-4 rounded-full bg-white/10 flex items-center justify-center"
             >
-              <span className="text-gradient-primary text-xl">AI</span>
+              <span className="text-green-400 text-xl">AI</span>
             </div>
             <h2 className="text-2xl font-bold mb-2 text-white">IA Discovery Assistant</h2>
             <p className="text-white/70 max-w-md">

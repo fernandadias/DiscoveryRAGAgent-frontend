@@ -27,10 +27,11 @@ const ChatObjectiveSelector = ({ objectives, onSelect }: ChatObjectiveSelectorPr
           key={objective.id}
           onClick={() => handleSelect(objective.id)}
           variant={selectedObjective === objective.id ? "solid" : "ghost"}
-          color={selectedObjective === objective.id ? "default" : "default"}
           size="sm"
           className={`animate-fade-in rounded-full ${
-            selectedObjective === objective.id ? 'bg-white/20 text-white' : ''
+            selectedObjective === objective.id 
+              ? 'bg-white/20 text-green-400 border border-green-400/50' 
+              : 'text-white hover:text-green-400'
           }`}
         >
           {objective.label}
