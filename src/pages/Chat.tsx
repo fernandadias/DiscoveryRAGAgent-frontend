@@ -230,9 +230,9 @@ const Chat = () => {
           onSendMessage={handleSendMessage} 
           isLoading={isLoading}
           suggestions={messages.length === 0 ? [
-            "Como nossa empresa pode se beneficiar da IA?",
-            "Quais são as tendências do mercado para 2025?",
-            "Quero validar o meu modelo de negócio"
+            "Como podemos melhorar o processo de discovery do nosso produto?",
+            "Quais métricas são mais relevantes para validar hipóteses de produto?",
+            "Preciso de insights sobre o comportamento dos usuários no nosso app"
           ] : undefined}
         />
       </div>

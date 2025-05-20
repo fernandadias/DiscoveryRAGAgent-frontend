@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { Button, Input } from '@heroui/react';
@@ -46,7 +45,7 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
     <div className="w-full">
       {suggestions.length > 0 && message.length === 0 && (
         <div className="mb-4">
-          <p className="text-sm text-muted-foreground mb-2">Sugestões para iniciar:</p>
+          <p className="text-sm text-white/50 mb-2">Sugestões para iniciar:</p>
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion, index) => (
               <Button
@@ -54,6 +53,7 @@ const ChatInput = ({ onSendMessage, isLoading, suggestions = [] }: ChatInputProp
                 onClick={() => handleSuggestionClick(suggestion)}
                 variant="ghost"
                 size="sm"
+                className="text-white/60 hover:text-white"
               >
                 {suggestion}
               </Button>
