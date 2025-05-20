@@ -55,7 +55,8 @@ export default function Login() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 mt-1 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Digite seu usuário"
             />
           </div>
 
@@ -70,7 +71,8 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 mt-1 text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Digite sua senha"
             />
           </div>
 
@@ -82,11 +84,6 @@ export default function Login() {
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </button>
-          </div>
-
-          <div className="text-sm text-center text-gray-500">
-            <p>Usuário padrão: Mario</p>
-            <p>Senha padrão: Bros</p>
           </div>
         </form>
       </div>
