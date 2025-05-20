@@ -1,31 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useDocuments, useDeleteDocument } from '@/hooks/use-api';
+import { useDocuments } from '@/hooks/use-api';
 import { Button } from '@heroui/react';
-import { RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw, FileText, Eye } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import api from '@/lib/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Documents = () => {
   const { data: documents = [], refetch, isLoading, isError } = useDocuments();
-  const deleteMutation = useDeleteDocument();
   const [isReindexing, setIsReindexing] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   
   // Forçar refetch na montagem do componente
   useEffect(() => {
     refetch();
   }, [refetch]);
   
-  const handleDeleteDocument = async (documentId: string) => {
-    try {
-      await deleteMutation.mutateAsync(documentId);
-      toast({
-        title: "Documento excluído",
-        description: "O documento foi removido com sucesso.",
-      });
-      refetch();
-    } catch (error) {
-      console.error('Error deleting document:', error);
-    }
+  const handlePreviewDocument = (doc) => {
+    setPreviewDoc(doc);
+    setIsPreviewOpen(true);
   };
   
   const handleReindexDocuments = async () => {
@@ -102,10 +101,17 @@ const Documents = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documents.map((doc) => (
-            <div key={doc.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+            <div 
+              key={doc.id} 
+              className="bg-white/5 border border-white/10 rounded-lg overflow-hidden hover:border-white/20 transition-all cursor-pointer"
+              onClick={() => handlePreviewDocument(doc)}
+            >
               <div className="p-4 border-b border-white/10">
-                <h3 className="text-white font-medium truncate">{doc.title}</h3>
-                <div className="text-white/50 text-sm mt-1">
+                <div className="flex items-start gap-3">
+                  <FileText className="text-white/60 mt-1 flex-shrink-0" size={18} />
+                  <h3 className="text-white font-medium">{doc.title}</h3>
+                </div>
+                <div className="text-white/50 text-sm mt-2 ml-7">
                   {new Date(doc.uploaded_at).toLocaleDateString()}
                 </div>
               </div>
@@ -121,10 +127,10 @@ const Documents = () => {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => handleDeleteDocument(doc.id)}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/10"
                 >
-                  <Trash2 size={16} />
+                  <Eye size={16} />
+                  <span className="ml-2">Visualizar</span>
                 </Button>
               </div>
             </div>
@@ -140,6 +146,45 @@ const Documents = () => {
           Para adicionar novos documentos, entre em contato com o administrador do sistema.
         </p>
       </div>
+
+      {/* Modal de pré-visualização do documento */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto bg-zinc-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white">{previewDoc?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-white/70 text-sm">
+                  Tipo: {previewDoc?.type}
+                </p>
+                <p className="text-white/70 text-sm">
+                  Tamanho: {previewDoc ? (previewDoc.size / 1024).toFixed(2) : 0} KB
+                </p>
+                <p className="text-white/70 text-sm">
+                  Data: {previewDoc ? new Date(previewDoc.uploaded_at).toLocaleDateString() : ''}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10 text-white/80">
+              <h3 className="text-white font-medium mb-2">Conteúdo do documento</h3>
+              <p className="text-white/70 italic">
+                Este documento está indexado no sistema RAG e pode ser consultado através do chat.
+                A visualização direta do conteúdo completo não está disponível nesta interface.
+              </p>
+              <div className="mt-4 p-3 bg-white/5 rounded border border-white/10">
+                <p className="text-white/60 text-sm font-mono">
+                  Documento indexado em: {previewDoc ? new Date(previewDoc.uploaded_at).toLocaleString() : ''}
+                </p>
+                <p className="text-white/60 text-sm font-mono mt-1">
+                  ID: {previewDoc?.id}
+                </p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
