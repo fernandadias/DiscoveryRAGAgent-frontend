@@ -1,4 +1,3 @@
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -18,22 +17,22 @@ const Infrastructure = () => {
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <h3 className="text-white font-medium">Pinecone</h3>
+            <h3 className="text-white font-medium">Weaviate</h3>
             <p className="text-white/60 text-sm">Banco de Dados Vetorial</p>
           </CardContent>
         </Card>
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <h3 className="text-white font-medium">Chunk Hybrid</h3>
-            <p className="text-white/60 text-sm">Processamento RAG</p>
+            <h3 className="text-white font-medium">FastAPI</h3>
+            <p className="text-white/60 text-sm">Backend Python</p>
           </CardContent>
         </Card>
         
         <Card className="glass-morphism">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <h3 className="text-white font-medium">38 Documentos</h3>
-            <p className="text-white/60 text-sm">Base de Conhecimento</p>
+            <h3 className="text-white font-medium">Render + Vercel</h3>
+            <p className="text-white/60 text-sm">Hospedagem</p>
           </CardContent>
         </Card>
       </div>
@@ -51,11 +50,10 @@ const Infrastructure = () => {
                 <AccordionContent>
                   <div className="space-y-3 text-white/80">
                     <p><strong>Modelo:</strong> GPT-4o</p>
-                    <p><strong>Parâmetros:</strong> 1.8 trilhões</p>
                     <p><strong>Temperatura:</strong> 0.7</p>
-                    <p><strong>Max tokens:</strong> 4096</p>
-                    <p><strong>Latência média:</strong> 1.2s</p>
-                    <p><strong>Features:</strong> Multimodal (texto e imagens), suporte a Retrieval-Augmented Generation (RAG), fine-tuning para domínio específico</p>
+                    <p><strong>Max tokens:</strong> 1500</p>
+                    <p><strong>API:</strong> OpenAI API v1.0.0+</p>
+                    <p><strong>Features:</strong> Citações diretas das fontes, reranking de resultados, chunking inteligente</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -64,12 +62,12 @@ const Infrastructure = () => {
                 <AccordionTrigger>Banco de Dados Vetorial</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-3 text-white/80">
-                    <p><strong>Solução:</strong> Pinecone</p>
-                    <p><strong>Dimensão dos vetores:</strong> 1536</p>
-                    <p><strong>Número de índices:</strong> 2</p>
-                    <p><strong>Métrica de similaridade:</strong> Cosine</p>
-                    <p><strong>Threshold de similaridade:</strong> 0.75</p>
-                    <p><strong>Escala:</strong> Auto-scale com limite de 100 QPS</p>
+                    <p><strong>Solução:</strong> Weaviate Cloud</p>
+                    <p><strong>Instância:</strong> discoveryragagent-backend</p>
+                    <p><strong>Região:</strong> us-west3 (GCP)</p>
+                    <p><strong>Modelo de Embeddings:</strong> OpenAI (text-embedding-ada-002)</p>
+                    <p><strong>Classe principal:</strong> Document</p>
+                    <p><strong>Plano recomendado:</strong> Starter ($7/mês)</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -78,27 +76,25 @@ const Infrastructure = () => {
                 <AccordionTrigger>Processamento RAG (Retrieval-Augmented Generation)</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-3 text-white/80">
-                    <p><strong>Método:</strong> Hybrid Chunking</p>
-                    <p><strong>Tamanho de chunk:</strong> 512 tokens</p>
-                    <p><strong>Overlap:</strong> 50 tokens</p>
+                    <p><strong>Fluxo:</strong> RAG &gt; Diretrizes &gt; Objetivo &gt; LLM &gt; Resposta</p>
+                    <p><strong>Chunking:</strong> Inteligente com sobreposição</p>
                     <p><strong>Top-K recuperação:</strong> 5 documentos</p>
-                    <p><strong>Reranking:</strong> Ativado com Cross-Encoder</p>
+                    <p><strong>Reranking:</strong> Implementado para priorizar resultados mais relevantes</p>
                     <p><strong>Embedding model:</strong> OpenAI ada-002</p>
-                    <p><strong>Estratégia de prompt:</strong> Documentos incorporados com contexto + query reformulation</p>
+                    <p><strong>Citações:</strong> Diretas das fontes nas respostas</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>
               
               <AccordionItem value="item-4">
-                <AccordionTrigger>Base de Conhecimento</AccordionTrigger>
+                <AccordionTrigger>Autenticação e Segurança</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-3 text-white/80">
-                    <p><strong>Documentos totais:</strong> 38</p>
-                    <p><strong>Tipos:</strong> PDF (22), Markdown (10), HTML (4), CSV (2)</p>
-                    <p><strong>Chunks processados:</strong> 782</p>
-                    <p><strong>Atualização:</strong> Automática a cada 24h</p>
-                    <p><strong>Fontes:</strong> Documentação interna, pesquisas de mercado, relatórios técnicos, feedback de usuários</p>
-                    <p><strong>Metadados:</strong> Autor, data, fonte, tags, relevância</p>
+                    <p><strong>Método:</strong> JWT (JSON Web Tokens)</p>
+                    <p><strong>Credenciais:</strong> Hardcoded (Mario/Bros)</p>
+                    <p><strong>Expiração de token:</strong> 24 horas</p>
+                    <p><strong>Proteção:</strong> Todas as rotas da API requerem autenticação</p>
+                    <p><strong>Armazenamento:</strong> LocalStorage no frontend</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>
@@ -107,13 +103,12 @@ const Infrastructure = () => {
                 <AccordionTrigger>Arquitetura e Integração</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-3 text-white/80">
-                    <p><strong>Frontend:</strong> React com TypeScript</p>
-                    <p><strong>Backend:</strong> Node.js com Express e WebSockets</p>
-                    <p><strong>Cache:</strong> Redis com TTL de 1h para consultas frequentes</p>
-                    <p><strong>Streaming:</strong> Server-Sent Events (SSE) para chat em tempo real</p>
-                    <p><strong>Monitoramento:</strong> Prometheus + Grafana</p>
-                    <p><strong>Latência e2e:</strong> 1.8s (p95)</p>
-                    <p><strong>Disponibilidade:</strong> 99.95% uptime</p>
+                    <p><strong>Frontend:</strong> React com TypeScript (Vite)</p>
+                    <p><strong>Backend:</strong> Python com FastAPI</p>
+                    <p><strong>Hospedagem Frontend:</strong> Vercel</p>
+                    <p><strong>Hospedagem Backend:</strong> Render (Plano Starter recomendado)</p>
+                    <p><strong>Estrutura de diretórios:</strong> Objetivos e diretrizes em arquivos MD</p>
+                    <p><strong>Feedback:</strong> Sistema de avaliação de respostas com motivos e detalhes</p>
                   </div>
                 </AccordionContent>
               </AccordionItem>

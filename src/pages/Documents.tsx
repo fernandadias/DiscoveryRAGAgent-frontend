@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDocuments, useDeleteDocument } from '@/hooks/use-api';
 import { Button } from '@heroui/react';
 import { RefreshCw, Trash2 } from 'lucide-react';
@@ -6,9 +6,14 @@ import { toast } from '@/hooks/use-toast';
 import api from '@/lib/api';
 
 const Documents = () => {
-  const { data: documents = [], refetch } = useDocuments();
+  const { data: documents = [], refetch, isLoading, isError } = useDocuments();
   const deleteMutation = useDeleteDocument();
   const [isReindexing, setIsReindexing] = useState(false);
+  
+  // Forçar refetch na montagem do componente
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   
   const handleDeleteDocument = async (documentId: string) => {
     try {
@@ -31,6 +36,8 @@ const Documents = () => {
         title: "Reindexação iniciada",
         description: "A reindexação dos documentos foi iniciada com sucesso.",
       });
+      // Refetch após um pequeno delay para dar tempo ao backend processar
+      setTimeout(() => refetch(), 2000);
     } catch (error) {
       console.error('Error reindexing documents:', error);
       toast({
@@ -58,17 +65,39 @@ const Documents = () => {
             <RefreshCw size={16} className={isReindexing ? "animate-spin" : ""} />
             {isReindexing ? 'Reindexando...' : 'Reindexar Documentos'}
           </Button>
-          
-          {/* Upload button removed as requested */}
         </div>
       </div>
       
-      {documents.length === 0 ? (
+      {isLoading ? (
+        <div className="text-center py-12 bg-white/5 rounded-lg">
+          <p className="text-white/70">Carregando documentos...</p>
+        </div>
+      ) : isError ? (
+        <div className="text-center py-12 bg-white/5 rounded-lg border border-red-500/30">
+          <p className="text-red-400">Erro ao carregar documentos.</p>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => refetch()}
+            className="mt-2 text-white/70"
+          >
+            Tentar novamente
+          </Button>
+        </div>
+      ) : documents.length === 0 ? (
         <div className="text-center py-12 bg-white/5 rounded-lg">
           <p className="text-white/70">Nenhum documento encontrado.</p>
           <p className="text-white/50 text-sm mt-2">
             Os documentos são gerenciados pelo administrador do sistema.
           </p>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => refetch()}
+            className="mt-2 text-white/70"
+          >
+            Atualizar lista
+          </Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
