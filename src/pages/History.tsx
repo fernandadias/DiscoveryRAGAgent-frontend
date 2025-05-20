@@ -1,83 +1,85 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ConversationHistory, { Conversation } from '@/components/ConversationHistory';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-
-// Mock data
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    title: 'Análise de mercado para 2025',
-    timestamp: new Date(2025, 4, 15, 14, 30),
-    preview: 'Como será o cenário de mercado para startups de IA em 2025?',
-    isSaved: true
-  },
-  {
-    id: '2',
-    title: 'Validação do modelo de negócios',
-    timestamp: new Date(2025, 4, 14, 10, 15),
-    preview: 'Quero validar meu modelo de assinatura para software B2B de IA generativa.',
-    isSaved: true
-  },
-  {
-    id: '3',
-    title: 'Insights sobre comportamento do consumidor',
-    timestamp: new Date(2025, 4, 10, 16, 45),
-    preview: 'Quais são as tendências de comportamento dos consumidores em relação a produtos com IA?',
-    isSaved: true
-  },
-  {
-    id: '4',
-    title: 'Comparação com concorrentes',
-    timestamp: new Date(2025, 4, 8, 9, 20),
-    preview: 'Como podemos nos diferenciar dos concorrentes no mercado de IA?',
-    isSaved: true
-  },
-];
+import { useConversations } from '@/hooks/use-api';
+import { Button } from '@heroui/react';
+import { MessageSquare, Calendar, ArrowRight } from 'lucide-react';
 
 const History = () => {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const navigate = useNavigate();
-  
-  const handleConversationSelect = (id: string) => {
-    setActiveConversationId(id);
-    // Em uma implementação real, carregaria a conversa e redirecionaria para o chat
-    setTimeout(() => {
-      navigate('/');
-    }, 300);
+  const { data: conversations = [], isLoading } = useConversations();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   };
-  
-  const handleConversationTitleChange = (id: string, newTitle: string) => {
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.id === id ? { ...conv, title: newTitle } : conv
-      )
-    );
-  };
-  
-  const handleStartNewConversation = () => {
-    navigate('/');
+
+  const handleViewConversation = (conversationId: string) => {
+    navigate(`/history/${conversationId}`);
   };
 
   return (
-    <div className="h-full p-4">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-xl font-medium text-white">Histórico de conversas</h1>
-        <Button onClick={handleStartNewConversation} className="flex items-center gap-1">
-          <PlusCircle size={18} />
-          Nova conversa
-        </Button>
-      </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6 text-white">Histórico de Conversas</h1>
       
-      <ConversationHistory 
-        conversations={conversations}
-        activeConversationId={activeConversationId}
-        onConversationSelect={handleConversationSelect}
-        onConversationTitleChange={handleConversationTitleChange}
-      />
+      {isLoading ? (
+        <div className="text-center py-8 text-white/70">Carregando histórico...</div>
+      ) : conversations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="w-16 h-16 mb-4 rounded-full bg-white/10 flex items-center justify-center">
+            <MessageSquare size={24} className="text-white/70" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2 text-white">Nenhuma conversa salva</h2>
+          <p className="text-white/70 max-w-md mb-6">
+            Suas conversas salvas aparecerão aqui. Inicie uma conversa e salve-a para acessá-la posteriormente.
+          </p>
+          <Button
+            onClick={() => navigate('/')}
+            variant="solid"
+            color="primary"
+          >
+            Iniciar Nova Conversa
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {conversations.map((conversation) => (
+            <div
+              key={conversation.id}
+              className="bg-white/5 p-4 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              onClick={() => handleViewConversation(conversation.id)}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-white">{conversation.title}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewConversation(conversation.id);
+                  }}
+                >
+                  <ArrowRight size={18} />
+                </Button>
+              </div>
+              <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
+                <div className="flex items-center gap-1">
+                  <Calendar size={14} />
+                  <span>{formatDate(conversation.created_at)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MessageSquare size={14} />
+                  <span>{conversation.message_count} mensagens</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
