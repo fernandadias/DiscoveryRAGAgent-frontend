@@ -201,3 +201,29 @@ export function useDeleteDocument() {
     },
   });
 }
+
+export interface Objective {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export function useObjectives() {
+  return useQuery({
+    queryKey: ['objectives'],
+    queryFn: async (): Promise<Objective[]> => {
+      try {
+        const response = await api.get('/api/objectives');
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching objectives:', error);
+        toast({
+          title: "Erro ao carregar objetivos",
+          description: "Não foi possível carregar a lista de objetivos.",
+          variant: "destructive",
+        });
+        return [];
+      }
+    },
+  });
+}
