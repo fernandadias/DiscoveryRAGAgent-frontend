@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDocuments, useDeleteDocument } from '@/hooks/use-api';
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import api from '@/lib/api';
@@ -73,22 +73,22 @@ const Documents = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documents.map((doc) => (
-            <Card key={doc.id} className="bg-white/5 border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white truncate">{doc.title}</CardTitle>
-                <CardDescription className="text-white/50">
+            <div key={doc.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+              <div className="p-4 border-b border-white/10">
+                <h3 className="text-white font-medium truncate">{doc.title}</h3>
+                <div className="text-white/50 text-sm mt-1">
                   {new Date(doc.uploaded_at).toLocaleDateString()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
+              </div>
+              <div className="p-4">
                 <p className="text-white/70 text-sm">
                   Tipo: {doc.type}
                 </p>
                 <p className="text-white/70 text-sm">
                   Tamanho: {(doc.size / 1024).toFixed(2)} KB
                 </p>
-              </CardContent>
-              <CardFooter className="flex justify-end">
+              </div>
+              <div className="p-4 border-t border-white/10 flex justify-end">
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -97,8 +97,8 @@ const Documents = () => {
                 >
                   <Trash2 size={16} />
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

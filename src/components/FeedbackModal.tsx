@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@heroui/react';
-import { Button, Checkbox, TextArea } from '@heroui/react';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@heroui/react';
 import { X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import api from '@/lib/api';
@@ -15,6 +14,36 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, messageI
   const [reasons, setReasons] = useState<string[]>([]);
   const [otherReason, setOtherReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Close modal with ESC key
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEsc);
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isOpen, onClose]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
 
   const feedbackReasons = [
     { id: 'irrelevant', label: 'Resposta irrelevante para a pergunta' },
@@ -74,70 +103,86 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose, messageI
     }
   };
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 border-white/10 text-white max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">O que poderia ser melhor?</DialogTitle>
-          <button 
-            onClick={onClose} 
-            className="absolute right-4 top-4 text-white/70 hover:text-white"
-          >
-            <X size={18} />
-          </button>
-        </DialogHeader>
+  if (!isOpen) return null;
 
-        <div className="py-4 space-y-4">
-          <div className="space-y-2">
-            {feedbackReasons.map(reason => (
-              <div key={reason.id} className="flex items-start gap-2">
-                <Checkbox 
-                  id={reason.id}
-                  checked={reasons.includes(reason.id)}
-                  onCheckedChange={() => handleReasonToggle(reason.id)}
-                />
-                <label 
-                  htmlFor={reason.id} 
-                  className="text-sm text-white/90 cursor-pointer"
-                >
-                  {reason.label}
-                </label>
-              </div>
-            ))}
+  return (
+    <>
+      {/* Modal backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+        onClick={onClose}
+      />
+      
+      {/* Modal content */}
+      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+        <div className="bg-gray-900 border border-white/10 text-white max-w-md w-full rounded-lg shadow-lg">
+          {/* Header */}
+          <div className="flex justify-between items-center p-4 border-b border-white/10">
+            <h2 className="text-xl font-semibold">O que poderia ser melhor?</h2>
+            <button 
+              onClick={onClose} 
+              className="text-white/70 hover:text-white"
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm text-white/90 block">
-              Detalhes adicionais (opcional)
-            </label>
-            <TextArea
-              value={otherReason}
-              onChange={(e) => setOtherReason(e.target.value)}
-              placeholder="Descreva o problema ou como poderíamos melhorar..."
-              className="w-full bg-white/5 border-white/10 text-white"
-              rows={3}
-            />
+          {/* Body */}
+          <div className="p-4 space-y-4">
+            <div className="space-y-2">
+              {feedbackReasons.map(reason => (
+                <div key={reason.id} className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id={reason.id}
+                    checked={reasons.includes(reason.id)}
+                    onChange={() => handleReasonToggle(reason.id)}
+                    className="mt-1"
+                  />
+                  <label 
+                    htmlFor={reason.id} 
+                    className="text-sm text-white/90 cursor-pointer"
+                  >
+                    {reason.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-white/90 block">
+                Detalhes adicionais (opcional)
+              </label>
+              <textarea
+                value={otherReason}
+                onChange={(e) => setOtherReason(e.target.value)}
+                placeholder="Descreva o problema ou como poderíamos melhorar..."
+                className="w-full bg-white/5 border border-white/10 text-white rounded p-2 resize-none"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end gap-2 p-4 border-t border-white/10">
+            <Button 
+              variant="ghost" 
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Enviando...' : 'Enviar feedback'}
+            </Button>
           </div>
         </div>
-
-        <DialogFooter>
-          <Button 
-            variant="ghost" 
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Enviando...' : 'Enviar feedback'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>
   );
 };
 

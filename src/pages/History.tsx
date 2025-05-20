@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useConversations } from '@/hooks/use-api';
-import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { Clock, MessageSquare, ArrowRight } from 'lucide-react';
 
 const History = () => {
@@ -50,21 +50,21 @@ const History = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {conversations.map((conversation) => (
-            <Card key={conversation.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
-              <CardHeader>
-                <CardTitle className="text-white truncate">{conversation.title}</CardTitle>
-                <CardDescription className="text-white/50 flex items-center gap-1">
+            <div key={conversation.id} className="bg-white/5 border border-white/10 hover:bg-white/10 transition-colors rounded-lg overflow-hidden">
+              <div className="p-4 border-b border-white/10">
+                <h3 className="text-white font-medium truncate">{conversation.title}</h3>
+                <div className="text-white/50 flex items-center gap-1 text-sm mt-1">
                   <Clock size={14} />
                   {formatDate(conversation.updated_at)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
+              </div>
+              <div className="p-4">
                 <p className="text-white/70 text-sm flex items-center gap-1">
                   <MessageSquare size={14} />
                   {conversation.message_count} mensagens
                 </p>
-              </CardContent>
-              <CardFooter className="flex justify-end">
+              </div>
+              <div className="p-4 border-t border-white/10 flex justify-end">
                 <Link to={`/history/${conversation.id}`}>
                   <Button 
                     variant="ghost" 
@@ -75,8 +75,8 @@ const History = () => {
                     <ArrowRight size={14} />
                   </Button>
                 </Link>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}

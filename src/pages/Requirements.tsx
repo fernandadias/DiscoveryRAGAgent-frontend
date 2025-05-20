@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from '@heroui/react';
 import { FileText, Book, Target } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
@@ -49,62 +48,80 @@ const Requirements = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
         </div>
       ) : (
-        <Tabs defaultValue="objectives" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white/5 border-white/10">
-            <TabsTrigger value="objectives" className="data-[state=active]:bg-white/10">
+        <div>
+          {/* Custom Tabs Implementation */}
+          <div className="flex border-b border-white/10">
+            <button
+              onClick={() => setActiveTab('objectives')}
+              className={`px-4 py-2 flex items-center ${
+                activeTab === 'objectives' 
+                  ? 'bg-white/10 text-white border-b-2 border-green-400' 
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+            >
               <Target size={16} className="mr-2" />
               Objetivos
-            </TabsTrigger>
-            <TabsTrigger value="guidelines" className="data-[state=active]:bg-white/10">
+            </button>
+            <button
+              onClick={() => setActiveTab('guidelines')}
+              className={`px-4 py-2 flex items-center ${
+                activeTab === 'guidelines' 
+                  ? 'bg-white/10 text-white border-b-2 border-green-400' 
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+            >
               <Book size={16} className="mr-2" />
               Diretrizes
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
           
-          <TabsContent value="objectives" className="mt-4">
-            <div className="grid grid-cols-1 gap-4">
-              {objectives.map((objective) => (
-                <Card key={objective.id} className="bg-white/5 border-white/10">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Target size={18} />
-                      {objective.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {objective.content}
-                      </ReactMarkdown>
+          {/* Tab Content */}
+          <div className="mt-4">
+            {activeTab === 'objectives' && (
+              <div className="grid grid-cols-1 gap-4">
+                {objectives.map((objective) => (
+                  <div key={objective.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+                    <div className="p-4 border-b border-white/10">
+                      <h3 className="text-white font-medium flex items-center gap-2">
+                        <Target size={18} />
+                        {objective.title}
+                      </h3>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="guidelines" className="mt-4">
-            <div className="grid grid-cols-1 gap-4">
-              {guidelines.map((guideline) => (
-                <Card key={guideline.id} className="bg-white/5 border-white/10">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <Book size={18} />
-                      {guideline.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-invert max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {guideline.content}
-                      </ReactMarkdown>
+                    <div className="p-4">
+                      <div className="prose prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {objective.content}
+                        </ReactMarkdown>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {activeTab === 'guidelines' && (
+              <div className="grid grid-cols-1 gap-4">
+                {guidelines.map((guideline) => (
+                  <div key={guideline.id} className="bg-white/5 border border-white/10 rounded-lg overflow-hidden">
+                    <div className="p-4 border-b border-white/10">
+                      <h3 className="text-white font-medium flex items-center gap-2">
+                        <Book size={18} />
+                        {guideline.title}
+                      </h3>
+                    </div>
+                    <div className="p-4">
+                      <div className="prose prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {guideline.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
