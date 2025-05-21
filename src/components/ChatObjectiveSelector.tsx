@@ -19,7 +19,14 @@ const ChatObjectiveSelector: React.FC<ChatObjectiveSelectorProps> = ({
   onSelectObjective,
   disabled = false
 }) => {
-  // Restaurar a UX de tags conforme solicitado pelo usuário
+  // Ordenar os objetivos para garantir que "Explorar o que já foi descoberto" seja o primeiro
+  const sortedObjectives = [...objectives].sort((a, b) => {
+    // Colocar "Explorar o que já foi descoberto" como primeiro item
+    if (a.title.includes("Explorar o que já foi descoberto")) return -1;
+    if (b.title.includes("Explorar o que já foi descoberto")) return 1;
+    return 0;
+  });
+
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-white/70 mb-2">
@@ -27,7 +34,7 @@ const ChatObjectiveSelector: React.FC<ChatObjectiveSelectorProps> = ({
       </label>
       
       <div className="flex flex-wrap gap-2">
-        {objectives.map((objective) => (
+        {sortedObjectives.map((objective) => (
           <button
             key={objective.id}
             onClick={() => onSelectObjective(objective.id)}
@@ -39,7 +46,7 @@ const ChatObjectiveSelector: React.FC<ChatObjectiveSelectorProps> = ({
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             title={objective.description || objective.title}
           >
-            {objective.title}
+            {objective.title.replace("Objetivo da Conversa: ", "")}
           </button>
         ))}
       </div>

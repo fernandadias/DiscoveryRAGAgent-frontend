@@ -1,13 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Save } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Save, Trash2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Button } from '@heroui/react';
 import ChatObjectiveSelector from '@/components/ChatObjectiveSelector';
 import ChatMessage, { MessageProps } from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
-import { useSendMessage, useSaveConversation, useObjectives } from '@/hooks/use-api';
+import { useSendMessage, useSaveConversation, useObjectives, useDeleteConversation } from '@/hooks/use-api';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Chat = () => {
   const [messages, setMessages] = useState<MessageProps[]>([]);
@@ -16,18 +26,21 @@ const Chat = () => {
   const [conversationTitle, setConversationTitle] = useState<string>('Nova conversa');
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [thinkingStage, setThinkingStage] = useState<string>('');
   
   const navigate = useNavigate();
   const sendMessageMutation = useSendMessage();
   const saveConversationMutation = useSaveConversation();
+  const deleteConversationMutation = useDeleteConversation();
   const { data: objectives = [] } = useObjectives();
 
   // Definir o objetivo padrão quando os objetivos são carregados
   useEffect(() => {
     if (objectives.length > 0 && !selectedObjective) {
-      // Encontrar o objetivo "Sobre a discovery" ou usar o primeiro
+      // Encontrar o objetivo "Explorar o que já foi descoberto" ou usar o primeiro
       const defaultObjective = objectives.find(obj => 
-        obj.title.toLowerCase().includes('discovery')
+        obj.title.toLowerCase().includes('explorar o que já foi descoberto')
       ) || objectives[0];
       
       if (defaultObjective) {
@@ -70,12 +83,34 @@ const Chat = () => {
     // Send message to API
     setIsLoading(true);
     
+    // Simular estágios de pensamento
+    const thinkingStages = [
+      'Analisando a consulta...',
+      'Buscando documentos relevantes...',
+      'Processando informações...',
+      'Formulando resposta...',
+      'Finalizando...'
+    ];
+    
+    let stageIndex = 0;
+    const thinkingInterval = setInterval(() => {
+      if (stageIndex < thinkingStages.length) {
+        setThinkingStage(thinkingStages[stageIndex]);
+        stageIndex++;
+      } else {
+        clearInterval(thinkingInterval);
+      }
+    }, 1000);
+    
     try {
       const response = await sendMessageMutation.mutateAsync({
         message: content,
         conversationId: conversationId,
         objectiveId: selectedObjective
       });
+      
+      // Limpar intervalo de pensamento
+      clearInterval(thinkingInterval);
       
       // Set conversation ID if not already set
       if (!conversationId) {
@@ -103,6 +138,9 @@ const Chat = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       
+      // Limpar intervalo de pensamento
+      clearInterval(thinkingInterval);
+      
       // Remove loading message and add error message
       setMessages(prev => {
         const filtered = prev.filter(m => m.id !== loadingMessageId);
@@ -118,6 +156,7 @@ const Chat = () => {
       });
     } finally {
       setIsLoading(false);
+      setThinkingStage('');
     }
   };
 
@@ -168,6 +207,17 @@ const Chat = () => {
     );
   };
 
+  const handleDeleteConversation = () => {
+    if (!conversationId) return;
+    
+    deleteConversationMutation.mutate(conversationId, {
+      onSuccess: () => {
+        // Redirecionar para a página inicial após excluir
+        navigate('/');
+      }
+    });
+  };
+
   // Sugestões iniciais para o chat
   const initialSuggestions = [
     "Como podemos melhorar o processo de discovery do nosso produto?",
@@ -187,15 +237,29 @@ const Chat = () => {
               disabled={isLoading}
             />
           </div>
-          <Button 
-            variant="bordered" 
-            size="sm" 
-            className={`ml-2 transition-all flex items-center gap-1 ${isSaved ? 'bg-white/10 text-green-400' : 'text-white hover:text-green-400'}`}
-            onClick={handleSaveConversation}
-          >
-            <Save size={16} />
-            {isSaved ? 'Salva' : 'Salvar conversa'}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="bordered" 
+              size="sm" 
+              className={`transition-all flex items-center gap-1 ${isSaved ? 'bg-white/10 text-green-400' : 'text-white hover:text-green-400'}`}
+              onClick={handleSaveConversation}
+            >
+              <Save size={16} />
+              {isSaved ? 'Salva' : 'Salvar conversa'}
+            </Button>
+            
+            {isSaved && (
+              <Button 
+                variant="bordered" 
+                size="sm" 
+                className="text-red-400 hover:bg-red-500/10 flex items-center gap-1"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 size={16} />
+                Excluir
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       
@@ -228,7 +292,11 @@ const Chat = () => {
           </div>
         ) : (
           messages.map(message => (
-            <ChatMessage key={message.id} {...message} />
+            <ChatMessage 
+              key={message.id} 
+              {...message} 
+              thinkingStage={message.isLoading ? thinkingStage : undefined}
+            />
           ))
         )}
       </div>
@@ -240,6 +308,29 @@ const Chat = () => {
         setIsLoading={setIsLoading}
         onSendMessage={handleSendMessage}
       />
+      
+      {/* Diálogo de confirmação para exclusão */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-zinc-900 border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Excluir conversa</AlertDialogTitle>
+            <AlertDialogDescription className="text-white/70">
+              Tem certeza que deseja excluir esta conversa? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/5 text-white hover:bg-white/10 border-white/10">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
+              onClick={handleDeleteConversation}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

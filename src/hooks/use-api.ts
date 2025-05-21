@@ -18,15 +18,17 @@ export interface ChatResponse {
 export interface SendMessageParams {
   message: string;
   conversationId?: string | null;
+  objectiveId?: string | null;
 }
 
 export function useSendMessage() {
   return useMutation({
-    mutationFn: async ({ message, conversationId = null }: SendMessageParams): Promise<ChatResponse> => {
+    mutationFn: async ({ message, conversationId = null, objectiveId = null }: SendMessageParams): Promise<ChatResponse> => {
       try {
         const response = await api.post('/api/chat', {
           query: message,
           conversation_id: conversationId,
+          objective_id: objectiveId
         });
         return response.data;
       } catch (error) {
@@ -121,6 +123,28 @@ export function useSaveConversation() {
         toast({
           title: "Erro ao salvar conversa",
           description: "Não foi possível salvar esta conversa.",
+          variant: "destructive",
+        });
+        throw error;
+      }
+    },
+  });
+}
+
+export function useDeleteConversation() {
+  return useMutation({
+    mutationFn: async (conversationId: string): Promise<void> => {
+      try {
+        await api.delete(`/api/conversations/${conversationId}`);
+        toast({
+          title: "Conversa excluída",
+          description: "A conversa foi excluída com sucesso.",
+        });
+      } catch (error) {
+        console.error('Error deleting conversation:', error);
+        toast({
+          title: "Erro ao excluir conversa",
+          description: "Não foi possível excluir esta conversa.",
           variant: "destructive",
         });
         throw error;
