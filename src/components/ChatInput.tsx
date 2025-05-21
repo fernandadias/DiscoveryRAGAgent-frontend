@@ -3,49 +3,34 @@ import { useSendMessage, SendMessageParams } from '@/hooks/use-send-message';
 import { useObjectives } from '@/hooks/use-api';
 import { Button } from '@heroui/react';
 import { Send, Loader2 } from 'lucide-react';
-import ChatObjectiveSelector from '@/components/ChatObjectiveSelector';
 
 interface ChatInputProps {
   conversationId: string | null;
   onMessageSent: (message: string, response: string, sources: any[]) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  onSendMessage: (message: string) => Promise<void>;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   conversationId,
   onMessageSent,
   isLoading,
-  setIsLoading
+  setIsLoading,
+  onSendMessage
 }) => {
   const [message, setMessage] = useState('');
-  const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
   const [loadingStage, setLoadingStage] = useState<string>('');
   const [loadingProgress, setLoadingProgress] = useState<number>(0);
   
-  const sendMessageMutation = useSendMessage();
-  const { data: objectives = [] } = useObjectives();
-  
-  // Selecionar o objetivo padrão quando os objetivos são carregados
+  // Simular estágios de processamento com progresso quando estiver carregando
   useEffect(() => {
-    if (objectives.length > 0 && !selectedObjective) {
-      // Encontrar o objetivo "Sobre a discovery" ou usar o primeiro
-      const defaultObjective = objectives.find(obj => 
-        obj.title.toLowerCase().includes('discovery')
-      ) || objectives[0];
-      
-      setSelectedObjective(defaultObjective.id);
+    if (!isLoading) {
+      setLoadingStage('');
+      setLoadingProgress(0);
+      return;
     }
-  }, [objectives, selectedObjective]);
-
-  const handleSendMessage = async () => {
-    if (!message.trim() || isLoading) return;
     
-    const userMessage = message;
-    setMessage('');
-    setIsLoading(true);
-    
-    // Simular estágios de processamento com progresso
     const stages = [
       'Analisando consulta...',
       'Buscando documentos relevantes...',
@@ -54,7 +39,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
       'Finalizando...'
     ];
     
-    // Iniciar simulação de estágios
     let currentStage = 0;
     const stageInterval = setInterval(() => {
       if (currentStage < stages.length) {
@@ -66,28 +50,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
       }
     }, 1500);
     
+    return () => clearInterval(stageInterval);
+  }, [isLoading]);
+
+  const handleSendMessage = async () => {
+    if (!message.trim() || isLoading) return;
+    
+    const userMessage = message;
+    setMessage('');
+    
     try {
-      const params: SendMessageParams = {
-        message: userMessage,
-        conversationId,
-        objectiveId: selectedObjective
-      };
-      
-      const response = await sendMessageMutation.mutateAsync(params);
-      
-      // Limpar intervalo quando a resposta chegar
-      clearInterval(stageInterval);
-      
-      // Notificar componente pai
-      onMessageSent(userMessage, response.response, response.sources);
+      await onSendMessage(userMessage);
     } catch (error) {
       console.error('Error sending message:', error);
-      // Limpar intervalo em caso de erro
-      clearInterval(stageInterval);
-    } finally {
-      setIsLoading(false);
-      setLoadingStage('');
-      setLoadingProgress(0);
     }
   };
 
@@ -117,39 +92,30 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
       
-      <div className="flex flex-col gap-3">
-        <ChatObjectiveSelector
-          objectives={objectives}
-          selectedObjective={selectedObjective}
-          onSelectObjective={setSelectedObjective}
-          disabled={isLoading}
-        />
-        
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Digite sua mensagem..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-green-500/50 resize-none h-[60px] max-h-[120px]"
-              disabled={isLoading}
-            />
-            <div className="absolute bottom-2 right-2">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleSendMessage}
-                disabled={!message.trim() || isLoading}
-                className="rounded-full w-8 h-8 p-0 flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <Send size={16} />
-                )}
-              </Button>
-            </div>
+      <div className="flex gap-2">
+        <div className="flex-1 relative">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Digite sua mensagem..."
+            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-green-500/50 resize-none h-[60px] max-h-[120px]"
+            disabled={isLoading}
+          />
+          <div className="absolute bottom-2 right-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || isLoading}
+              className="rounded-full w-8 h-8 p-0 flex items-center justify-center"
+            >
+              {isLoading ? (
+                <Loader2 className="animate-spin" size={16} />
+              ) : (
+                <Send size={16} />
+              )}
+            </Button>
           </div>
         </div>
       </div>

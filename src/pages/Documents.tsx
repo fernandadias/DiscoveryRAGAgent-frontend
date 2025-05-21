@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDocuments } from '@/hooks/use-api';
 import { Button } from '@heroui/react';
-import { RefreshCw, FileText, Eye } from 'lucide-react';
+import { RefreshCw, FileText, Eye, FileIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import api from '@/lib/api';
 import {
@@ -14,17 +14,42 @@ import {
 const Documents = () => {
   const { data: documents = [], refetch, isLoading, isError } = useDocuments();
   const [isReindexing, setIsReindexing] = useState(false);
-  const [previewDoc, setPreviewDoc] = useState(null);
+  const [previewDoc, setPreviewDoc] = useState<any>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewContent, setPreviewContent] = useState<string>('');
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   
-  // Forçar refetch na montagem do componente
+  // Forçar refetch na montagem do componente e a cada 5 segundos
   useEffect(() => {
     refetch();
+    
+    // Refetch periódico para garantir que todos os documentos sejam exibidos
+    const interval = setInterval(() => {
+      refetch();
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, [refetch]);
   
-  const handlePreviewDocument = (doc) => {
+  const handlePreviewDocument = async (doc: any) => {
     setPreviewDoc(doc);
     setIsPreviewOpen(true);
+    setIsLoadingPreview(true);
+    
+    try {
+      // Tentar buscar o conteúdo do documento para pré-visualização
+      const response = await api.get(`/api/documents/${doc.id}/preview`);
+      if (response.data && response.data.content) {
+        setPreviewContent(response.data.content);
+      } else {
+        setPreviewContent('Não foi possível carregar o conteúdo deste documento.');
+      }
+    } catch (error) {
+      console.error('Error fetching document preview:', error);
+      setPreviewContent('Erro ao carregar a pré-visualização do documento.');
+    } finally {
+      setIsLoadingPreview(false);
+    }
   };
   
   const handleReindexDocuments = async () => {
@@ -46,6 +71,23 @@ const Documents = () => {
       });
     } finally {
       setIsReindexing(false);
+    }
+  };
+  
+  // Função para determinar o ícone com base no tipo de documento
+  const getDocumentIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf':
+        return <FileText className="text-red-400" size={18} />;
+      case 'docx':
+      case 'doc':
+        return <FileText className="text-blue-400" size={18} />;
+      case 'txt':
+        return <FileText className="text-gray-400" size={18} />;
+      case 'md':
+        return <FileText className="text-purple-400" size={18} />;
+      default:
+        return <FileIcon className="text-white/60" size={18} />;
     }
   };
   
@@ -108,7 +150,7 @@ const Documents = () => {
             >
               <div className="p-4 border-b border-white/10">
                 <div className="flex items-start gap-3">
-                  <FileText className="text-white/60 mt-1 flex-shrink-0" size={18} />
+                  {getDocumentIcon(doc.type)}
                   <h3 className="text-white font-medium">{doc.title}</h3>
                 </div>
                 <div className="text-white/50 text-sm mt-2 ml-7">
@@ -151,7 +193,10 @@ const Documents = () => {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto bg-zinc-900 border-white/10">
           <DialogHeader>
-            <DialogTitle className="text-white">{previewDoc?.title}</DialogTitle>
+            <DialogTitle className="text-white flex items-center gap-2">
+              {previewDoc && getDocumentIcon(previewDoc.type)}
+              {previewDoc?.title}
+            </DialogTitle>
           </DialogHeader>
           <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
             <div className="flex items-center justify-between mb-4">
@@ -167,21 +212,36 @@ const Documents = () => {
                 </p>
               </div>
             </div>
-            <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10 text-white/80">
-              <h3 className="text-white font-medium mb-2">Conteúdo do documento</h3>
-              <p className="text-white/70 italic">
-                Este documento está indexado no sistema RAG e pode ser consultado através do chat.
-                A visualização direta do conteúdo completo não está disponível nesta interface.
-              </p>
-              <div className="mt-4 p-3 bg-white/5 rounded border border-white/10">
-                <p className="text-white/60 text-sm font-mono">
-                  Documento indexado em: {previewDoc ? new Date(previewDoc.uploaded_at).toLocaleString() : ''}
-                </p>
-                <p className="text-white/60 text-sm font-mono mt-1">
-                  ID: {previewDoc?.id}
-                </p>
+            
+            {isLoadingPreview ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10 text-white/80">
+                <h3 className="text-white font-medium mb-2">Conteúdo do documento</h3>
+                {previewContent ? (
+                  <div className="mt-2 p-3 bg-white/5 rounded border border-white/10 max-h-[400px] overflow-y-auto">
+                    <pre className="text-white/80 text-sm font-mono whitespace-pre-wrap">
+                      {previewContent}
+                    </pre>
+                  </div>
+                ) : (
+                  <p className="text-white/70 italic">
+                    Este documento está indexado no sistema RAG e pode ser consultado através do chat.
+                    A visualização direta do conteúdo completo não está disponível nesta interface.
+                  </p>
+                )}
+                <div className="mt-4 p-3 bg-white/5 rounded border border-white/10">
+                  <p className="text-white/60 text-sm font-mono">
+                    Documento indexado em: {previewDoc ? new Date(previewDoc.uploaded_at).toLocaleString() : ''}
+                  </p>
+                  <p className="text-white/60 text-sm font-mono mt-1">
+                    ID: {previewDoc?.id}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

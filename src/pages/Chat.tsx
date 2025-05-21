@@ -4,53 +4,49 @@ import { Save } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Button } from '@heroui/react';
 import ChatObjectiveSelector from '@/components/ChatObjectiveSelector';
-import ChatMessage, { MessageProps, Source } from '@/components/ChatMessage';
+import ChatMessage, { MessageProps } from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
-import { useSendMessage, useSaveConversation } from '@/hooks/use-api';
-import api from '@/lib/api';
+import { useSendMessage, useSaveConversation, useObjectives } from '@/hooks/use-api';
 import { toast } from '@/hooks/use-toast';
 
 const Chat = () => {
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedObjective, setSelectedObjective] = useState<string | null>(null);
-  const [objectives, setObjectives] = useState<{id: string, label: string}[]>([]);
   const [conversationTitle, setConversationTitle] = useState<string>('Nova conversa');
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  
   const navigate = useNavigate();
   const sendMessageMutation = useSendMessage();
   const saveConversationMutation = useSaveConversation();
+  const { data: objectives = [] } = useObjectives();
 
-  // Carregar objetivos e definir o padrão
+  // Definir o objetivo padrão quando os objetivos são carregados
   useEffect(() => {
-    const fetchObjectives = async () => {
-      try {
-        // Buscar todos os objetivos
-        const objectivesResponse = await api.get('/api/objectives');
-        const objectivesList = objectivesResponse.data.map((obj: any) => ({
-          id: obj.id,
-          label: obj.title
-        }));
-        setObjectives(objectivesList);
-        
-        // Buscar o objetivo padrão
-        const defaultObjectiveResponse = await api.get('/api/objectives/default');
-        setSelectedObjective(defaultObjectiveResponse.data);
-      } catch (error) {
-        console.error('Error fetching objectives:', error);
-        toast({
-          title: "Erro ao carregar objetivos",
-          description: "Não foi possível carregar os objetivos da conversa.",
-          variant: "destructive",
-        });
+    if (objectives.length > 0 && !selectedObjective) {
+      // Encontrar o objetivo "Sobre a discovery" ou usar o primeiro
+      const defaultObjective = objectives.find(obj => 
+        obj.title.toLowerCase().includes('discovery')
+      ) || objectives[0];
+      
+      if (defaultObjective) {
+        setSelectedObjective(defaultObjective.id);
       }
-    };
-    
-    fetchObjectives();
-  }, []);
+    }
+  }, [objectives, selectedObjective]);
 
-  const handleSendMessage = (content: string) => {
+  const handleMessageSent = (userMessage: string, response: string, sources: any[]) => {
+    // Atualizar o título da conversa se for a primeira mensagem
+    if (messages.length === 0 && !isSaved) {
+      const newTitle = userMessage.length > 50 ? userMessage.substring(0, 50) + '...' : userMessage;
+      setConversationTitle(newTitle);
+    }
+  };
+
+  const handleSendMessage = async (content: string) => {
+    if (!content.trim() || isLoading) return;
+    
     // Add user message
     const userMessage: MessageProps = {
       id: nanoid(),
@@ -73,66 +69,56 @@ const Chat = () => {
     
     // Send message to API
     setIsLoading(true);
-    sendMessageMutation.mutate(
-      { 
-        message: content, 
+    
+    try {
+      const response = await sendMessageMutation.mutateAsync({
+        message: content,
         conversationId: conversationId,
-        objectiveId: selectedObjective 
-      },
-      {
-        onSuccess: (data) => {
-          setIsLoading(false);
-          
-          // Set conversation ID if not already set
-          if (!conversationId) {
-            setConversationId(data.conversation_id);
-          }
-          
-          // Remove loading message and add real response
-          setMessages(prev => {
-            const filtered = prev.filter(m => m.id !== loadingMessageId);
-            return [
-              ...filtered, 
-              {
-                id: nanoid(),
-                content: data.response,
-                isUser: false,
-                timestamp: new Date(),
-                sources: data.sources
-              }
-            ];
-          });
-          
-          // Se é a primeira mensagem, atualiza o título automático da conversa
-          if (messages.length === 0 && !isSaved) {
-            // Cria um título baseado na primeira mensagem (limitado a 50 caracteres)
-            const newTitle = content.length > 50 ? content.substring(0, 50) + '...' : content;
-            setConversationTitle(newTitle);
-          }
-        },
-        onError: () => {
-          setIsLoading(false);
-          
-          // Remove loading message and add error message
-          setMessages(prev => {
-            const filtered = prev.filter(m => m.id !== loadingMessageId);
-            return [
-              ...filtered, 
-              {
-                id: nanoid(),
-                content: "Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.",
-                isUser: false,
-                timestamp: new Date()
-              }
-            ];
-          });
-        }
+        objectiveId: selectedObjective
+      });
+      
+      // Set conversation ID if not already set
+      if (!conversationId) {
+        setConversationId(response.conversation_id);
       }
-    );
-  };
-
-  const handleObjectiveSelect = (objectiveId: string) => {
-    setSelectedObjective(objectiveId);
+      
+      // Remove loading message and add real response
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== loadingMessageId);
+        return [
+          ...filtered, 
+          {
+            id: nanoid(),
+            content: response.response,
+            isUser: false,
+            timestamp: new Date(),
+            sources: response.sources
+          }
+        ];
+      });
+      
+      // Notificar sobre a mensagem enviada
+      handleMessageSent(content, response.response, response.sources);
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Remove loading message and add error message
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== loadingMessageId);
+        return [
+          ...filtered, 
+          {
+            id: nanoid(),
+            content: "Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.",
+            isUser: false,
+            timestamp: new Date()
+          }
+        ];
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveConversation = () => {
@@ -182,6 +168,13 @@ const Chat = () => {
     );
   };
 
+  // Sugestões iniciais para o chat
+  const initialSuggestions = [
+    "Como podemos melhorar o processo de discovery do nosso produto?",
+    "Quais métricas são mais relevantes para validar hipóteses de produto?",
+    "Preciso de insights sobre o comportamento dos usuários no nosso app"
+  ];
+
   return (
     <div className="flex flex-col h-full max-h-screen">
       <div className="border-b border-white/10 p-4">
@@ -190,7 +183,8 @@ const Chat = () => {
             <ChatObjectiveSelector 
               objectives={objectives}
               selectedObjective={selectedObjective}
-              onSelect={handleObjectiveSelect}
+              onSelectObjective={setSelectedObjective}
+              disabled={isLoading}
             />
           </div>
           <Button 
@@ -214,9 +208,23 @@ const Chat = () => {
               <span className="text-green-400 text-xl">AI</span>
             </div>
             <h2 className="text-2xl font-bold mb-2 text-white">IA Discovery Assistant</h2>
-            <p className="text-white/70 max-w-md">
+            <p className="text-white/70 max-w-md mb-8">
               Responda suas dúvidas sobre produtos, valide hipóteses de negócio e obtenha insights valiosos com base nos nossos dados.
             </p>
+            
+            {/* Sugestões iniciais */}
+            <div className="w-full max-w-md space-y-2">
+              <p className="text-white/60 text-sm">Experimente perguntar:</p>
+              {initialSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSendMessage(suggestion)}
+                  className="w-full text-left p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/80 transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           messages.map(message => (
@@ -225,17 +233,13 @@ const Chat = () => {
         )}
       </div>
       
-      <div className="p-4 border-t border-white/10">
-        <ChatInput 
-          onSendMessage={handleSendMessage} 
-          isLoading={isLoading}
-          suggestions={messages.length === 0 ? [
-            "Como podemos melhorar o processo de discovery do nosso produto?",
-            "Quais métricas são mais relevantes para validar hipóteses de produto?",
-            "Preciso de insights sobre o comportamento dos usuários no nosso app"
-          ] : undefined}
-        />
-      </div>
+      <ChatInput 
+        conversationId={conversationId}
+        onMessageSent={handleMessageSent}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        onSendMessage={handleSendMessage}
+      />
     </div>
   );
 };
