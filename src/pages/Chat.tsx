@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, Trash2 } from 'lucide-react';
 import { nanoid } from 'nanoid';
@@ -6,6 +6,7 @@ import { Button } from '@heroui/react';
 import ChatObjectiveSelector from '@/components/ChatObjectiveSelector';
 import ChatMessage, { MessageProps } from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
+import AutoObjectiveClassifier from '@/components/AutoObjectiveClassifier';
 import { useSendMessage, useSaveConversation, useObjectives, useDeleteConversation } from '@/hooks/use-api';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -28,12 +29,15 @@ const Chat = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [thinkingStage, setThinkingStage] = useState<string>('');
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  const [showObjectiveClassifier, setShowObjectiveClassifier] = useState(false);
   
   const navigate = useNavigate();
   const sendMessageMutation = useSendMessage();
   const saveConversationMutation = useSaveConversation();
   const deleteConversationMutation = useDeleteConversation();
   const { data: objectives = [] } = useObjectives();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Definir o objetivo padrão quando os objetivos são carregados
   useEffect(() => {
@@ -49,6 +53,13 @@ const Chat = () => {
     }
   }, [objectives, selectedObjective]);
 
+  // Rolar para o final das mensagens quando novas mensagens são adicionadas
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   const handleMessageSent = (userMessage: string, response: string, sources: any[]) => {
     // Atualizar o título da conversa se for a primeira mensagem
     if (messages.length === 0 && !isSaved) {
@@ -57,9 +68,49 @@ const Chat = () => {
     }
   };
 
+  const handleClassificationComplete = (objectiveId: string, autoAccepted: boolean) => {
+    setSelectedObjective(objectiveId);
+    setShowObjectiveClassifier(false);
+    
+    // Se a mensagem estava pendente, enviá-la agora com o objetivo classificado
+    if (pendingMessage) {
+      processSendMessage(pendingMessage, objectiveId);
+      setPendingMessage(null);
+    }
+    
+    // Mostrar toast informativo se foi aceito automaticamente
+    if (autoAccepted) {
+      const objectiveTitle = objectives.find(obj => obj.id === objectiveId)?.title || 'desconhecido';
+      toast({
+        title: "Objetivo identificado automaticamente",
+        description: `Sua pergunta foi classificada como "${objectiveTitle}"`,
+      });
+    }
+  };
+
+  const handleClassificationCancel = () => {
+    setShowObjectiveClassifier(false);
+    // Se a mensagem estava pendente, enviá-la com o objetivo selecionado manualmente
+    if (pendingMessage && selectedObjective) {
+      processSendMessage(pendingMessage, selectedObjective);
+      setPendingMessage(null);
+    }
+  };
+
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || isLoading) return;
     
+    // Se o usuário já selecionou um objetivo manualmente, usar esse
+    if (selectedObjective) {
+      processSendMessage(content, selectedObjective);
+    } else {
+      // Caso contrário, mostrar o classificador automático
+      setPendingMessage(content);
+      setShowObjectiveClassifier(true);
+    }
+  };
+
+  const processSendMessage = async (content: string, objectiveId: string) => {
     // Add user message
     const userMessage: MessageProps = {
       id: nanoid(),
@@ -106,7 +157,7 @@ const Chat = () => {
       const response = await sendMessageMutation.mutateAsync({
         message: content,
         conversationId: conversationId,
-        objectiveId: selectedObjective
+        objectiveId: objectiveId
       });
       
       // Limpar intervalo de pensamento
@@ -127,7 +178,9 @@ const Chat = () => {
             content: response.response,
             isUser: false,
             timestamp: new Date(),
-            sources: response.sources
+            sources: response.sources,
+            objectiveId: response.objective_id,
+            autoClassified: response.auto_classified
           }
         ];
       });
@@ -174,7 +227,10 @@ const Chat = () => {
     const messagesToSave = messages.map(msg => ({
       content: msg.content,
       isUser: msg.isUser,
-      timestamp: msg.timestamp
+      timestamp: msg.timestamp,
+      sources: msg.sources,
+      objectiveId: msg.objectiveId,
+      autoClassified: msg.autoClassified
     }));
 
     // Salvar conversa via API
@@ -220,9 +276,9 @@ const Chat = () => {
 
   // Sugestões iniciais para o chat
   const initialSuggestions = [
-    "Como podemos melhorar o processo de discovery do nosso produto?",
-    "Quais métricas são mais relevantes para validar hipóteses de produto?",
-    "Preciso de insights sobre o comportamento dos usuários no nosso app"
+    "Como podemos melhorar a home do app para aumentar o engajamento dos usuários?",
+    "Quais são os principais problemas que os usuários enfrentam com a home do app?",
+    "Nossa hipótese é que usuários preferem uma home com menos elementos. Os dados confirmam isso?"
   ];
 
   return (
@@ -273,7 +329,7 @@ const Chat = () => {
             </div>
             <h2 className="text-2xl font-bold mb-2 text-white">IA Discovery Assistant</h2>
             <p className="text-white/70 max-w-md mb-8">
-              Responda suas dúvidas sobre produtos, valide hipóteses de negócio e obtenha insights valiosos com base nos nossos dados.
+              Responda suas dúvidas sobre a home do app, valide hipóteses de design e obtenha insights valiosos com base nos nossos dados.
             </p>
             
             {/* Sugestões iniciais */}
@@ -291,20 +347,34 @@ const Chat = () => {
             </div>
           </div>
         ) : (
-          messages.map(message => (
-            <ChatMessage 
-              key={message.id} 
-              {...message} 
-              thinkingStage={message.isLoading ? thinkingStage : undefined}
-            />
-          ))
+          <>
+            {messages.map(message => (
+              <ChatMessage 
+                key={message.id} 
+                {...message} 
+                thinkingStage={message.isLoading ? thinkingStage : undefined}
+              />
+            ))}
+            
+            {/* Componente de classificação automática */}
+            {showObjectiveClassifier && pendingMessage && (
+              <AutoObjectiveClassifier
+                query={pendingMessage}
+                onClassificationComplete={handleClassificationComplete}
+                onCancel={handleClassificationCancel}
+                objectives={objectives}
+              />
+            )}
+            
+            <div ref={messagesEndRef} />
+          </>
         )}
       </div>
       
       <ChatInput 
         conversationId={conversationId}
         onMessageSent={handleMessageSent}
-        isLoading={isLoading}
+        isLoading={isLoading || showObjectiveClassifier}
         setIsLoading={setIsLoading}
         onSendMessage={handleSendMessage}
       />
